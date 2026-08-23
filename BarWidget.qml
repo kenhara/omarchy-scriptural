@@ -45,13 +45,7 @@ BarWidget {
   implicitWidth: button.implicitWidth
   implicitHeight: button.implicitHeight
 
-  function handleSummonPayload(obj) {
-    return dailyBreadStore.handleSummonPayload(obj)
-  }
-
-  function open(payloadJson) {
-    if (payloadJson !== undefined && payloadJson !== null && String(payloadJson).length)
-      root.handleSummonPayload(payloadJson)
+  function open() {
     if (panelLoader.item) panelLoader.item.open()
   }
 
@@ -67,8 +61,8 @@ BarWidget {
     if (panelLoader.item) panelLoader.item.closeForPopoutSwitch()
   }
 
-  function onBarMiddleClick() {
-    // Useful middle-click: force refresh VOTD with toast.
+  // Local name — middle-click force-refreshes VOTD (not a framework hook).
+  function refreshVotd() {
     dailyBreadStore.refresh(true)
   }
 
@@ -136,7 +130,7 @@ BarWidget {
     }
     onPressed: function(buttonCode) {
       if (buttonCode === Qt.LeftButton) root.toggle()
-      else if (buttonCode === Qt.MiddleButton) root.onBarMiddleClick()
+      else if (buttonCode === Qt.MiddleButton) root.refreshVotd()
     }
   }
 }

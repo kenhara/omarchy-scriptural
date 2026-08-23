@@ -2,7 +2,7 @@
 """Daily Bread — Midvash verse of the day (no auth).
 
 CLI for Omarchy / omarchy-shell bar-widget.
-User-Agent: DailyBread/0.1.1 (Omarchy unofficial; harris.daily-bread)
+User-Agent version is read from manifest.json (fallback 0.1.2).
 
 Unofficial. Not affiliated with Midvash or any Bible publisher.
 Copyrighted translations (ESV/NIV/…) are for personal display via public API.
@@ -18,12 +18,29 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
 VOTD_URL = "https://api.midvash.com/v1/votd"
 VERSIONS_URL = "https://api.midvash.com/v1/versions"
-USER_AGENT = "DailyBread/0.1.1 (Omarchy unofficial; harris.daily-bread)"
+PLUGIN_ID = "harris.daily-bread"
 MIN_INTERVAL_SEC = 0.5
+
+
+def read_manifest_version() -> str:
+    try:
+        manifest = Path(__file__).resolve().parent.parent / "manifest.json"
+        data = json.loads(manifest.read_text(encoding="utf-8"))
+        ver = str(data.get("version") or "").strip()
+        if ver:
+            return ver
+    except Exception:
+        pass
+    return "0.1.2"
+
+
+VERSION = read_manifest_version()
+USER_AGENT = f"DailyBread/{VERSION} (Omarchy unofficial; {PLUGIN_ID})"
 
 COMMON_VERSIONS = ("web", "kjv", "esv", "niv", "nkjv", "nlt", "msg")
 
@@ -84,11 +101,19 @@ def normalize_language(lang: str) -> str:
     return s or "en"
 
 
+def sanitize_https_url(url: str) -> str:
+    """Only allow https: URLs from remote payload."""
+    u = str(url or "").strip()
+    if u.lower().startswith("https://"):
+        return u
+    return ""
+
+
 def build_ok(payload: dict[str, Any], version: str, language: str) -> dict[str, Any]:
     ref = str(payload.get("reference") or "").strip()
     text = str(payload.get("text") or "").strip()
     ver = str(payload.get("version") or version).strip().lower() or version
-    url = str(payload.get("url") or "").strip()
+    url = sanitize_https_url(payload.get("url") or "")
     return {
         "ok": True,
         "reference": ref,

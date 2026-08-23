@@ -2,16 +2,21 @@
 
 ![Daily Bread](preview.png)
 
-Verse of the day. Pause. Unofficial.
+Give us this day the verse. Pause. Unofficial.
 
-Daily scripture for Omarchy — bar shows today’s short reference, panel shows
-the verse. Named for the familiar prayer line — daily bread. Powered by the
-**Midvash** public VOTD API. No API keys. No publisher chrome.
+Daily scripture for Omarchy — bar **lingers** on today’s short reference
+(`Jer 33:3`), panel shows the verse. Named for the familiar prayer line.
+Powered by the **Midvash** public VOTD API. No API keys. No publisher chrome.
 
 **ID:** `harris.daily-bread`  
 **Author:** Harris Kenny  
 **License:** MIT  
-**Version:** 0.1.1
+**Version:** 0.1.2
+
+### 0.1.2
+- Pre-ship checklist: `Text.PlainText` on API verse/ref, https-only Open,
+  UA from `manifest.json`, drop dead summon/`aliases`, pluginDir decode,
+  witty pitch + bar linger of short ref, Controls L/M honesty, version sync.
 
 ### 0.1.1
 - Pre-audit harden from sibling audits (Space Jockey / Security Theater /
@@ -115,9 +120,10 @@ with a **cached** chip — never presented as a fresh network fetch.
 |-------|--------|
 | Left-click bar | Toggle panel |
 | Middle-click bar | Force refresh VOTD |
+| Right-click bar | None (host default) |
 | Copy verse | Clipboard: `"text" — Reference (VER)` |
 | Copy reference | Clipboard: reference only |
-| Open | Midvash verse URL |
+| Open | Midvash verse URL (`https:` only) |
 | Translation chips | Switch version + refetch / cache |
 
 ## Remove
@@ -144,7 +150,8 @@ rm -rf ~/.cache/daily-bread
 Outbound HTTPS on bootstrap (if cache miss), version change, or middle-click
 refresh. No auth. No signup.
 
-User-Agent: `DailyBread/0.1.1 (Omarchy unofficial; harris.daily-bread)`.
+User-Agent: `DailyBread/<manifest version> (Omarchy unofficial; harris.daily-bread)`
+(version read from `manifest.json`).
 
 **Timezone:** the VOTD “day” key is **UTC** (same verse worldwide for a given
 UTC calendar date). Cache file: `~/.cache/daily-bread/votd.json` keyed by
@@ -173,7 +180,7 @@ python3 scripts/votd.py --version web --language en
 ## Layout
 
 ```
-manifest.json          # harris.daily-bread @ 0.1.1
+manifest.json          # harris.daily-bread @ 0.1.2
 BarWidget.qml          # bar entry + Loader → Panel; middle-click refresh
 Panel.qml              # verse + chips + actions (Flickable)
 DailyBreadStore.qml    # cache, Process → votd.py
@@ -184,6 +191,7 @@ preview.svg
 preview.png
 DESIGN.md
 PRE-AUDIT.md
+PRE-SHIP.md
 REPO.md
 LICENSE                # MIT
 README.md
@@ -200,7 +208,7 @@ README.md
 
 ## Preview
 
-Open `docs/preview/index.html` in a browser for a filled HTML mock (v0.1.1)
+Open `docs/preview/index.html` in a browser for a filled HTML mock (v0.1.2)
 with today’s sample (Jeremiah 33:3 WEB). Marketplace card: `preview.png`
 (also embedded above).
 

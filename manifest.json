@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "id": "harris.daily-bread",
   "name": "Daily Bread",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": "Harris Kenny",
   "license": "MIT",
-  "description": "Verse of the day. Pause. Unofficial.",
+  "description": "Give us this day the verse. Pause. Unofficial.",
   "kinds": [
     "bar-widget"
   ],
@@ -23,18 +23,10 @@
   ],
   "barWidget": {
     "displayName": "Daily Bread",
-    "description": "Verse of the day. Pause. Midvash public VOTD. Unofficial.",
+    "description": "Verse of the day. A quiet pause. Midvash public VOTD. Unofficial.",
     "category": "Lifestyle",
     "allowMultiple": false,
     "defaultSection": "right",
-    "aliases": [
-      "daily bread",
-      "bible",
-      "verse",
-      "votd",
-      "scripture",
-      "daily verse"
-    ],
     "defaults": {
       "version": "web",
       "language": "en"

@@ -36,9 +36,17 @@ QtObject {
 
   readonly property string cacheDir: Quickshell.env("HOME") + "/.cache/daily-bread"
   readonly property string cachePath: cacheDir + "/votd.json"
-  readonly property string pluginDir: String(Qt.resolvedUrl("."))
-    .replace(/^file:\/\//, "")
-    .replace(/\/$/, "")
+  // Percent-decode so paths with spaces work for python3
+  readonly property string pluginDir: {
+    var raw = String(Qt.resolvedUrl("."))
+      .replace(/^file:\/\//, "")
+      .replace(/\/$/, "")
+    try {
+      return decodeURIComponent(raw)
+    } catch (e) {
+      return raw
+    }
+  }
   readonly property string votdPath: pluginDir + "/scripts/votd.py"
 
   readonly property string barGlyph: "●"
@@ -168,10 +176,20 @@ QtObject {
     return store.copyText(store.reference || "")
   }
 
-  function openUrlExternal(url) {
+  function sanitizeOpenUrl(url) {
     var u = String(url || "").trim()
+    if (!u.length)
+      return ""
+    // https only — refuse file:/mailto:/custom schemes from remote payload
+    if (u.toLowerCase().indexOf("https://") === 0)
+      return u
+    return ""
+  }
+
+  function openUrlExternal(url) {
+    var u = store.sanitizeOpenUrl(url)
     if (!u.length) {
-      store.showToast("No URL")
+      store.showToast(String(url || "").trim().length ? "Refused — https only" : "No URL")
       return false
     }
     try {
@@ -234,7 +252,7 @@ QtObject {
     }
     store.reference = String(payload.reference || "")
     store.text = String(payload.text || "")
-    store.url = String(payload.url || "")
+    store.url = store.sanitizeOpenUrl(payload.url || "")
     store.verseVersion = String(payload.version || store.version || "web").toLowerCase()
     store.verseDate = String(payload.date || obj.date || store.todayIso())
     store.fetchedAt = obj.fetchedAt || payload.fetchedAt || store.fetchedAt || ""
@@ -354,36 +372,6 @@ QtObject {
 
   function bootstrap() {
     cacheFile.reload()
-  }
-
-  function handleSummonPayload(obj) {
-    if (obj === undefined || obj === null || obj === "")
-      return false
-    if (typeof obj === "string") {
-      var raw = String(obj).trim()
-      if (!raw.length) return false
-      try { obj = JSON.parse(raw) } catch (e) {
-        // Treat bare string as version slug
-        store.setVersion(raw)
-        return true
-      }
-    }
-    if (typeof obj !== "object") return false
-    var acted = false
-    if (obj.version || obj.v || obj.translation) {
-      store.setVersion(obj.version || obj.v || obj.translation)
-      acted = true
-    }
-    if (obj.language || obj.lang) {
-      store.language = store.normalizeLanguage(obj.language || obj.lang)
-      acted = true
-    }
-    if (obj.refresh === true || obj.refresh === "true" || obj.refresh === 1
-        || obj.reload === true) {
-      store.refresh(true)
-      acted = true
-    }
-    return acted
   }
 
   Component.onCompleted: {

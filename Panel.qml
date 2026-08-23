@@ -4,7 +4,7 @@ import qs.Commons
 import qs.Ui
 
 // Nested details panel for Daily Bread (loaded by BarWidget — not a separate kind).
-// 0.1.1 — verse of the day · pause. Midvash public VOTD.
+// 0.1.2 — verse of the day · pause. Midvash public VOTD.
 Panel {
   id: root
   moduleName: "harris.daily-bread"
@@ -49,14 +49,6 @@ Panel {
     if (root.bar && typeof root.bar.switchPanelFrom === "function")
       return root.bar.switchPanelFrom(root.barIdentity, direction)
     return false
-  }
-
-  function handleSummonPayload(obj) {
-    if (!liveStore) return false
-    var acted = liveStore.handleSummonPayload(obj)
-    if (acted && !root.opened)
-      root.open()
-    return acted
   }
 
   implicitWidth: Style.space(420)
@@ -151,6 +143,7 @@ Panel {
             Text {
               width: parent.width
               text: liveStore ? (liveStore.text || "") : ""
+              textFormat: Text.PlainText
               color: root.contentForeground
               font.family: root.contentFontFamily
               font.pixelSize: Style.font.title
@@ -165,6 +158,7 @@ Panel {
 
               Text {
                 text: liveStore ? (liveStore.reference || "") : ""
+                textFormat: Text.PlainText
                 color: root.contentForeground
                 font.family: root.contentFontFamily
                 font.pixelSize: Style.font.subtitle
@@ -185,6 +179,7 @@ Panel {
                   id: chipLabel
                   anchors.centerIn: parent
                   text: liveStore ? (liveStore.versionChip || "WEB") : "WEB"
+                  textFormat: Text.PlainText
                   color: root.dailyBreadAccent
                   font.family: root.contentFontFamily
                   font.pixelSize: Style.font.caption

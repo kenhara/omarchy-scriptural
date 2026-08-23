@@ -1,13 +1,13 @@
 # Daily Bread — design notes
 
-**Status:** 0.1.1 (verse of the day · pause)  
+**Status:** 0.1.2 (verse of the day · pause)  
 **Id:** `harris.daily-bread`  
 **Peers:** Fair Witness, Yellow Pixels, Security Theater, Space Jockey
 
 ## Why
 
-*Daily Bread* — a quiet daily verse in the Omarchy bar. Personal
-unofficial client for Midvash public VOTD. No API keys. No publisher chrome.
+*Daily Bread* — give us this day the verse. A quiet pause in the Omarchy
+bar. Personal unofficial client for Midvash public VOTD. No API keys.
 
 ## Shape (playbook lessons)
 
@@ -25,11 +25,15 @@ unofficial client for Midvash public VOTD. No API keys. No publisher chrome.
 | Unofficial disclaimer | Not affiliated with Midvash or Bible publishers |
 | Primary UI simple | Verse + ref + chips + three actions |
 | Hover + pointer | `containsMouse` on actionable only |
+| PlainText on API text | Verse + reference `textFormat: Text.PlainText` |
+| https-only Open | Refuse non-`https:` remote URLs |
+| UA from manifest | `scripts/votd.py` reads `manifest.json` |
 
 ## Bar
 
-Short ref when loaded (`Jer 33:3`) else `● Bread`. Left click toggles panel.
-Tooltip: *Daily Bread — verse of the day · middle: refresh*. Middle click refreshes.
+Short ref **lingers** when loaded (`Jer 33:3`) else `● Bread`. Left click
+toggles panel. Tooltip: *Daily Bread — verse of the day · middle: refresh*.
+Middle click refreshes. Right-click: none (host default).
 
 ## Panel
 
@@ -44,7 +48,7 @@ Tooltip: *Daily Bread — verse of the day · middle: refresh*. Middle click ref
 - VOTD: `GET https://api.midvash.com/v1/votd?language=en&version=web`
 - Versions: `GET https://api.midvash.com/v1/versions?language=en`
 - Default: `web` (World English Bible, public domain / CC0)
-- UA: `DailyBread/0.1.1 (Omarchy unofficial; harris.daily-bread)`
+- UA: `DailyBread/<manifest version> (Omarchy unofficial; harris.daily-bread)`
 - Day key: **UTC** calendar date
 
 ## Non-goals
