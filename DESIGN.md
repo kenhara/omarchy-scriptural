@@ -1,6 +1,6 @@
 # Daily Bread — design notes
 
-**Status:** 0.1.2 (verse of the day · pause)  
+**Status:** 0.1.3 (discoverability · Widgets category)  
 **Id:** `harris.daily-bread`  
 **Peers:** Fair Witness, Yellow Pixels, Security Theater, Space Jockey
 

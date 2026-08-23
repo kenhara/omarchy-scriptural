@@ -11,7 +11,10 @@ Powered by the **Midvash** public VOTD API. No API keys. No publisher chrome.
 **ID:** `harris.daily-bread`  
 **Author:** Harris Kenny  
 **License:** MIT  
-**Version:** 0.1.2
+**Version:** 0.1.3
+
+### 0.1.3
+- Discoverability: category **Widgets**; expanded `keywords` + restored `barWidget.aliases` for search docs; honest note.
 
 ### 0.1.2
 - Pre-ship checklist: `Text.PlainText` on API verse/ref, https-only Open,
@@ -48,6 +51,16 @@ English Bible), which Midvash documents as public domain / CC0. Do not
 redistribute copyrighted translation text beyond what the API and publishers
 allow. Attribution for the translation in use belongs to its copyright holder;
 this plugin only surfaces Midvash’s `version` field and a quiet footer.
+
+## Discoverability
+
+Marketplace filing: **Widgets** · tags `bar, quickshell` (suggest missing tag:
+`faith` or `bible`).
+
+Top-level `keywords` in `manifest.json` may help marketplace/search (Bible,
+VOTD, KJV, NIV, ESV, Midvash, devotion, etc.). `barWidget.aliases` are for
+discovery docs and human search — the bar loader may not index them. Display
+name stays **Daily Bread** (prayer allusion; no publisher as title).
 
 ## Install
 
@@ -208,7 +221,7 @@ README.md
 
 ## Preview
 
-Open `docs/preview/index.html` in a browser for a filled HTML mock (v0.1.2)
+Open `docs/preview/index.html` in a browser for a filled HTML mock (v0.1.3)
 with today’s sample (Jeremiah 33:3 WEB). Marketplace card: `preview.png`
 (also embedded above).
 

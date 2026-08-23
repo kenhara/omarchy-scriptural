@@ -1,4 +1,9 @@
-# Daily Bread — pre-ship checklist (0.1.2)
+# Daily Bread — pre-ship checklist (0.1.3)
+
+## PRE-SHIP note — discoverability (0.1.3)
+
+Patch bump for marketplace discoverability before UTM smoke: `barWidget.category` **Lifestyle → Widgets**; expanded `keywords` + restored `barWidget.aliases` (Bible/VOTD/KJV/NIV/Midvash…); README Discoverability; suggest missing tag `faith` or `bible`. No QML/votd change.
+
 
 Omarchy Quattro pre-ship pass for `harris.daily-bread`. Builds on
 `PRE-AUDIT.md` (0.1.1) plus Fair Witness 0.1.2 marketplace lessons.
@@ -18,7 +23,7 @@ Omarchy Quattro pre-ship pass for `harris.daily-bread`. Builds on
 | honest toasts | OK | Copied / Opened / Failed only on real outcome |
 | PlainText on verse text from API | OK | Verse + reference + version chip |
 | https allow-list for Open | OK | `sanitizeOpenUrl` + votd.py `sanitize_https_url` |
-| version sync | OK | **0.1.2** across manifest / README / DESIGN / preview / UA |
+| version sync | OK | **0.1.3** across manifest / README / DESIGN / preview / UA |
 | integer/enum schema | OK | `version` + `language` enums |
 | no summon fakes | OK | Dropped `handleSummonPayload` / payload `open()` (bar-widget can't summon) |
 | hover | OK | `containsMouse` + `hoverEnabled` on actionable |
@@ -28,7 +33,7 @@ Omarchy Quattro pre-ship pass for `harris.daily-bread`. Builds on
 | cached chip honesty | OK | `showingCached` when disk/offline — never fake fresh |
 | UA from manifest | OK | `scripts/votd.py` reads `manifest.json` |
 | bar linger of ref | OK | Short ref stays on bar while verse present |
-| drop `barWidget.aliases` | OK | Ignored for bar-widget; keywords remain |
+| `barWidget.aliases` | OK | Restored for discovery docs (0.1.3); bar loader may not index |
 
 ## Pre-ship grep (expect empty)
 

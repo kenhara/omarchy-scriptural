@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "id": "harris.daily-bread",
   "name": "Daily Bread",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "author": "Harris Kenny",
   "license": "MIT",
-  "description": "Give us this day the verse. Pause. Unofficial.",
+  "description": "Give us this day the verse. Pause. Unofficial Midvash Bible verse of the day; not affiliated.",
   "kinds": [
     "bar-widget"
   ],
@@ -15,16 +15,32 @@
   "keywords": [
     "daily bread",
     "bible",
-    "verse",
+    "bible verse",
+    "verse of the day",
     "votd",
     "scripture",
     "daily verse",
-    "midvash"
+    "kjv",
+    "niv",
+    "esv",
+    "web bible",
+    "world english bible",
+    "midvash",
+    "devotion",
+    "quiet time",
+    "psalm",
+    "gospel",
+    "our father",
+    "lords prayer",
+    "lord's prayer",
+    "christian",
+    "faith",
+    "verse"
   ],
   "barWidget": {
     "displayName": "Daily Bread",
-    "description": "Verse of the day. A quiet pause. Midvash public VOTD. Unofficial.",
-    "category": "Lifestyle",
+    "description": "Verse of the day. A quiet pause. Midvash public VOTD. Unofficial; not affiliated with Midvash or any Bible publisher.",
+    "category": "Widgets",
     "allowMultiple": false,
     "defaultSection": "right",
     "defaults": {
@@ -58,6 +74,24 @@
         ],
         "defaultValue": "en"
       }
+    ],
+    "aliases": [
+      "daily bread",
+      "bible",
+      "bible verse",
+      "verse of the day",
+      "votd",
+      "scripture",
+      "daily verse",
+      "kjv",
+      "niv",
+      "esv",
+      "web bible",
+      "midvash",
+      "devotion",
+      "quiet time",
+      "christian",
+      "faith"
     ]
   }
 }

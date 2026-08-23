@@ -2,7 +2,7 @@
 """Daily Bread — Midvash verse of the day (no auth).
 
 CLI for Omarchy / omarchy-shell bar-widget.
-User-Agent version is read from manifest.json (fallback 0.1.2).
+User-Agent version is read from manifest.json (fallback 0.1.3).
 
 Unofficial. Not affiliated with Midvash or any Bible publisher.
 Copyrighted translations (ESV/NIV/…) are for personal display via public API.
@@ -36,7 +36,7 @@ def read_manifest_version() -> str:
             return ver
     except Exception:
         pass
-    return "0.1.2"
+    return "0.1.3"
 
 
 VERSION = read_manifest_version()
