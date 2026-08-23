@@ -17,7 +17,7 @@ BarWidget {
     : false
 
   readonly property color foreground: root.bar ? root.bar.foreground : Color.foreground
-  readonly property string fontFamily: root.bar ? root.bar.fontFamily : Style.font.family
+  readonly property string fontFamily: root.bar ? root.bar.fontFamily : "monospace"
 
   // Soft amber / parchment accent — quiet pause vibe
   readonly property color dailyBreadAccent: Qt.rgba(0.91, 0.72, 0.38, 1.0)
@@ -87,7 +87,6 @@ BarWidget {
       version: root.version,
       language: root.language
     })
-    dailyBreadStore.panelOpen = root.opened
   }
 
   onBarChanged: injectPanel()
@@ -95,7 +94,6 @@ BarWidget {
     injectPanel()
     syncStoreSettings()
   }
-  onOpenedChanged: dailyBreadStore.panelOpen = root.opened
   onVersionChanged: syncStoreSettings()
   onLanguageChanged: syncStoreSettings()
 
@@ -128,8 +126,12 @@ BarWidget {
       var tip = "Daily Bread — verse of the day · middle: refresh"
       if (dailyBreadStore.loading)
         tip = "Daily Bread — refreshing… · middle: refresh"
-      else if (dailyBreadStore.reference)
-        tip = "Daily Bread — " + dailyBreadStore.reference + " · middle: refresh"
+      else if (dailyBreadStore.reference) {
+        tip = "Daily Bread — " + dailyBreadStore.reference
+        if (dailyBreadStore.showingCached)
+          tip += " (cached)"
+        tip += " · middle: refresh"
+      }
       return tip
     }
     onPressed: function(buttonCode) {

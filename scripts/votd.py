@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Daily Bread — Midvash verse of the day (no auth).
 
-CLI for Omarchy Quattro bar-widget.
-User-Agent: DailyBread/0.1 (Omarchy unofficial; harris.daily-bread)
+CLI for Omarchy / omarchy-shell bar-widget.
+User-Agent: DailyBread/0.1.1 (Omarchy unofficial; harris.daily-bread)
 
 Unofficial. Not affiliated with Midvash or any Bible publisher.
 Copyrighted translations (ESV/NIV/…) are for personal display via public API.
+VOTD calendar day is UTC (same verse worldwide for a given UTC date).
 """
 from __future__ import annotations
 
@@ -16,12 +17,12 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from datetime import date, datetime, timezone
+from datetime import datetime, timezone
 from typing import Any
 
 VOTD_URL = "https://api.midvash.com/v1/votd"
 VERSIONS_URL = "https://api.midvash.com/v1/versions"
-USER_AGENT = "DailyBread/0.1 (Omarchy unofficial; harris.daily-bread)"
+USER_AGENT = "DailyBread/0.1.1 (Omarchy unofficial; harris.daily-bread)"
 MIN_INTERVAL_SEC = 0.5
 
 COMMON_VERSIONS = ("web", "kjv", "esv", "niv", "nkjv", "nlt", "msg")
@@ -36,7 +37,8 @@ def emit(obj: dict[str, Any], exit_code: int = 0) -> None:
 
 
 def today_iso() -> str:
-    return date.today().isoformat()
+    """UTC calendar day — Midvash VOTD key; matches DailyBreadStore.todayIso()."""
+    return datetime.now(timezone.utc).date().isoformat()
 
 
 def http_get_json(url: str, timeout: float = 30.0) -> tuple[int, Any, str]:

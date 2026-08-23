@@ -4,7 +4,7 @@ import qs.Commons
 import qs.Ui
 
 // Nested details panel for Daily Bread (loaded by BarWidget — not a separate kind).
-// 0.1.0 — verse of the day · pause. Midvash public VOTD.
+// 0.1.1 — verse of the day · pause. Midvash public VOTD.
 Panel {
   id: root
   moduleName: "harris.daily-bread"
@@ -16,7 +16,7 @@ Panel {
 
   readonly property var barIdentity: hostWidget || root
   readonly property color contentForeground: bar ? bar.foreground : Color.foreground
-  readonly property string contentFontFamily: bar ? bar.fontFamily : Style.font.family
+  readonly property string contentFontFamily: bar ? bar.fontFamily : "monospace"
   readonly property color themeBackground: {
     try {
       if (typeof Color !== "undefined" && Color.popups && Color.popups.background)
@@ -32,6 +32,18 @@ Panel {
   readonly property color dailyBreadAccent: Qt.rgba(0.91, 0.72, 0.38, 1.0)
 
   readonly property var liveStore: store
+
+  // Popout-switch safety — bar may call this while switching panels.
+  property bool popoutSwitchClosing: false
+  function closeForPopoutSwitch() {
+    root.popoutSwitchClosing = true
+    try {
+      if (typeof root.close === "function")
+        root.close()
+    } finally {
+      Qt.callLater(function () { root.popoutSwitchClosing = false })
+    }
+  }
 
   function switchPanel(direction) {
     if (root.bar && typeof root.bar.switchPanelFrom === "function")
@@ -83,7 +95,7 @@ Panel {
             text: "DAILY BREAD"
             color: root.dailyBreadAccent
             font.family: root.contentFontFamily
-            font.pixelSize: Style.font.size(18)
+            font.pixelSize: Style.font.title
             font.bold: true
             font.letterSpacing: 3.2
           }
@@ -93,7 +105,7 @@ Panel {
             color: root.contentForeground
             opacity: 0.5
             font.family: root.contentFontFamily
-            font.pixelSize: Style.font.size(12)
+            font.pixelSize: Style.font.body
             width: parent.width
           }
         }
@@ -105,7 +117,7 @@ Panel {
           text: liveStore ? liveStore.lastError : ""
           color: Color.urgent
           font.family: root.contentFontFamily
-          font.pixelSize: Style.font.size(11)
+          font.pixelSize: Style.font.bodySmall
           wrapMode: Text.WordWrap
         }
 
@@ -115,7 +127,7 @@ Panel {
           text: liveStore ? liveStore.toastText : ""
           color: root.dailyBreadAccent
           font.family: root.contentFontFamily
-          font.pixelSize: Style.font.size(11)
+          font.pixelSize: Style.font.bodySmall
         }
 
         // Verse card
@@ -123,7 +135,7 @@ Panel {
           width: parent.width
           visible: liveStore && liveStore.hasVerse
           height: visible ? verseInner.implicitHeight + Style.space(28) : 0
-          radius: 12
+          radius: Style.space(12)
           color: Qt.rgba(root.dailyBreadAccent.r, root.dailyBreadAccent.g, root.dailyBreadAccent.b, 0.08)
           border.width: 1
           border.color: Qt.rgba(root.dailyBreadAccent.r, root.dailyBreadAccent.g, root.dailyBreadAccent.b, 0.35)
@@ -141,7 +153,7 @@ Panel {
               text: liveStore ? (liveStore.text || "") : ""
               color: root.contentForeground
               font.family: root.contentFontFamily
-              font.pixelSize: Style.font.size(16)
+              font.pixelSize: Style.font.title
               font.italic: true
               wrapMode: Text.WordWrap
               lineHeight: 1.35
@@ -155,7 +167,7 @@ Panel {
                 text: liveStore ? (liveStore.reference || "") : ""
                 color: root.contentForeground
                 font.family: root.contentFontFamily
-                font.pixelSize: Style.font.size(13)
+                font.pixelSize: Style.font.subtitle
                 font.bold: true
                 anchors.verticalCenter: parent.verticalCenter
               }
@@ -163,7 +175,7 @@ Panel {
               Rectangle {
                 width: chipLabel.implicitWidth + Style.space(14)
                 height: Style.space(22)
-                radius: 6
+                radius: Style.space(6)
                 color: Qt.rgba(root.dailyBreadAccent.r, root.dailyBreadAccent.g, root.dailyBreadAccent.b, 0.2)
                 border.width: 1
                 border.color: Qt.rgba(root.dailyBreadAccent.r, root.dailyBreadAccent.g, root.dailyBreadAccent.b, 0.45)
@@ -175,9 +187,32 @@ Panel {
                   text: liveStore ? (liveStore.versionChip || "WEB") : "WEB"
                   color: root.dailyBreadAccent
                   font.family: root.contentFontFamily
-                  font.pixelSize: Style.font.size(10)
+                  font.pixelSize: Style.font.caption
                   font.bold: true
                   font.letterSpacing: 1.2
+                }
+              }
+
+              Rectangle {
+                visible: liveStore && liveStore.showingCached
+                width: cachedLabel.implicitWidth + Style.space(14)
+                height: Style.space(22)
+                radius: Style.space(6)
+                color: Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.08)
+                border.width: 1
+                border.color: Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.16)
+                anchors.verticalCenter: parent.verticalCenter
+
+                Text {
+                  id: cachedLabel
+                  anchors.centerIn: parent
+                  text: "cached"
+                  color: root.contentForeground
+                  opacity: 0.65
+                  font.family: root.contentFontFamily
+                  font.pixelSize: Style.font.caption
+                  font.bold: true
+                  font.letterSpacing: 0.8
                 }
               }
             }
@@ -188,13 +223,11 @@ Panel {
         Text {
           width: parent.width
           visible: liveStore && !liveStore.hasVerse && !(liveStore.loading)
-          text: liveStore && liveStore.loading
-            ? "Loading verse…"
-            : "No verse yet. Middle-click the bar to refresh."
+          text: "No verse yet. Middle-click the bar to refresh."
           color: root.contentForeground
           opacity: 0.5
           font.family: root.contentFontFamily
-          font.pixelSize: Style.font.size(12)
+          font.pixelSize: Style.font.body
           wrapMode: Text.WordWrap
         }
 
@@ -204,10 +237,13 @@ Panel {
           visible: liveStore && liveStore.hasVerse
 
           Rectangle {
+            id: copyVerseBtn
             width: Style.space(92)
             height: Style.space(30)
-            radius: 6
-            color: Qt.rgba(root.dailyBreadAccent.r, root.dailyBreadAccent.g, root.dailyBreadAccent.b, 0.22)
+            radius: Style.space(6)
+            color: copyVerseMa.containsMouse
+              ? Qt.rgba(root.dailyBreadAccent.r, root.dailyBreadAccent.g, root.dailyBreadAccent.b, 0.34)
+              : Qt.rgba(root.dailyBreadAccent.r, root.dailyBreadAccent.g, root.dailyBreadAccent.b, 0.22)
             border.width: 1
             border.color: Qt.rgba(root.dailyBreadAccent.r, root.dailyBreadAccent.g, root.dailyBreadAccent.b, 0.5)
             Text {
@@ -215,21 +251,26 @@ Panel {
               text: "Copy verse"
               color: root.contentForeground
               font.family: root.contentFontFamily
-              font.pixelSize: Style.font.size(11)
+              font.pixelSize: Style.font.bodySmall
               font.bold: true
             }
             MouseArea {
+              id: copyVerseMa
               anchors.fill: parent
+              hoverEnabled: true
               cursorShape: Qt.PointingHandCursor
               onClicked: if (liveStore) liveStore.copyVerse()
             }
           }
 
           Rectangle {
+            id: copyRefBtn
             width: Style.space(110)
             height: Style.space(30)
-            radius: 6
-            color: Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.08)
+            radius: Style.space(6)
+            color: copyRefMa.containsMouse
+              ? Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.14)
+              : Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.08)
             border.width: 1
             border.color: Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.12)
             Text {
@@ -237,20 +278,25 @@ Panel {
               text: "Copy reference"
               color: root.contentForeground
               font.family: root.contentFontFamily
-              font.pixelSize: Style.font.size(11)
+              font.pixelSize: Style.font.bodySmall
             }
             MouseArea {
+              id: copyRefMa
               anchors.fill: parent
+              hoverEnabled: true
               cursorShape: Qt.PointingHandCursor
               onClicked: if (liveStore) liveStore.copyReference()
             }
           }
 
           Rectangle {
+            id: openBtn
             width: Style.space(56)
             height: Style.space(30)
-            radius: 6
-            color: Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.08)
+            radius: Style.space(6)
+            color: openMa.containsMouse
+              ? Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.14)
+              : Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.08)
             border.width: 1
             border.color: Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.12)
             Text {
@@ -258,11 +304,13 @@ Panel {
               text: "Open"
               color: root.contentForeground
               font.family: root.contentFontFamily
-              font.pixelSize: Style.font.size(11)
+              font.pixelSize: Style.font.bodySmall
               font.bold: true
             }
             MouseArea {
+              id: openMa
               anchors.fill: parent
+              hoverEnabled: true
               cursorShape: Qt.PointingHandCursor
               onClicked: if (liveStore) liveStore.openVerse()
             }
@@ -279,7 +327,7 @@ Panel {
             color: root.contentForeground
             opacity: 0.4
             font.family: root.contentFontFamily
-            font.pixelSize: Style.font.size(10)
+            font.pixelSize: Style.font.caption
             font.bold: true
             font.letterSpacing: 1.6
           }
@@ -301,10 +349,14 @@ Panel {
                   && liveStore.normalizeVersion(liveStore.version) === String(modelData.slug)
                 width: Style.space(48)
                 height: Style.space(28)
-                radius: 8
-                color: selected
-                  ? Qt.rgba(root.dailyBreadAccent.r, root.dailyBreadAccent.g, root.dailyBreadAccent.b, 0.28)
-                  : Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.06)
+                radius: Style.space(8)
+                color: {
+                  if (chipMa.containsMouse && !selected)
+                    return Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.12)
+                  if (selected)
+                    return Qt.rgba(root.dailyBreadAccent.r, root.dailyBreadAccent.g, root.dailyBreadAccent.b, 0.28)
+                  return Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.06)
+                }
                 border.width: 1
                 border.color: selected
                   ? Qt.rgba(root.dailyBreadAccent.r, root.dailyBreadAccent.g, root.dailyBreadAccent.b, 0.55)
@@ -315,12 +367,14 @@ Panel {
                   text: modelData.label || String(modelData.slug || "").toUpperCase()
                   color: selected ? root.dailyBreadAccent : root.contentForeground
                   font.family: root.contentFontFamily
-                  font.pixelSize: Style.font.size(11)
+                  font.pixelSize: Style.font.bodySmall
                   font.bold: selected
                 }
 
                 MouseArea {
+                  id: chipMa
                   anchors.fill: parent
+                  hoverEnabled: true
                   cursorShape: Qt.PointingHandCursor
                   onClicked: if (liveStore) liveStore.setVersion(modelData.slug)
                 }
@@ -334,7 +388,7 @@ Panel {
             color: root.contentForeground
             opacity: 0.32
             font.family: root.contentFontFamily
-            font.pixelSize: Style.font.size(10)
+            font.pixelSize: Style.font.caption
             wrapMode: Text.WordWrap
           }
         }
@@ -346,21 +400,21 @@ Panel {
 
           Text {
             width: parent.width
-            text: "Midvash · unofficial · public API"
+            text: "Midvash · unofficial · public API · VOTD day = UTC"
             color: root.contentForeground
             opacity: 0.22
             font.family: root.contentFontFamily
-            font.pixelSize: Style.font.size(10)
+            font.pixelSize: Style.font.caption
             wrapMode: Text.WordWrap
           }
 
           Text {
             width: parent.width
-            text: "WEB public domain · ESV/NIV/… personal display via API"
+            text: "WEB public domain · ESV/NIV/… personal display via API — translation © holders"
             color: root.contentForeground
             opacity: 0.18
             font.family: root.contentFontFamily
-            font.pixelSize: Style.font.size(9)
+            font.pixelSize: Style.font.caption
             wrapMode: Text.WordWrap
           }
         }

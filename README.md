@@ -1,5 +1,7 @@
 # Daily Bread
 
+![Daily Bread](preview.png)
+
 Verse of the day. Pause. Unofficial.
 
 Daily scripture for Omarchy — bar shows today’s short reference, panel shows
@@ -9,7 +11,14 @@ the verse. Named for the familiar prayer line — daily bread. Powered by the
 **ID:** `harris.daily-bread`  
 **Author:** Harris Kenny  
 **License:** MIT  
-**Version:** 0.1.0
+**Version:** 0.1.1
+
+### 0.1.1
+- Pre-audit harden from sibling audits (Space Jockey / Security Theater /
+  Yellow Pixels / Fair Witness): named `Style.font.*` tokens, clipboardText +
+  honest copy toasts, FileView cache (no mkdir race), dead `dataChanged`
+  removed, hover on actions, UTC VOTD day, `cached` honesty, popout-switch,
+  UA `DailyBread/0.1.1`, README hero preview, LICENSE/docs scrub.
 
 ### 0.1.0
 - MVP — bar short ref (`Jer 33:3`) or `● Bread`, panel verse + chips,
@@ -97,7 +106,8 @@ python3 scripts/votd.py --list-versions --language en
 4. Tap a translation chip (WEB · KJV · ESV · NIV) to switch; rest in settings.
 5. **Middle-click** bar forces a network refresh (cache bypass).
 
-Offline: last successful verse for that date+version stays on screen.
+Offline: last successful verse for that **UTC date + version** stays on screen
+with a **cached** chip — never presented as a fresh network fetch.
 
 ### Controls
 
@@ -122,22 +132,31 @@ Optional cache cleanup:
 rm -rf ~/.cache/daily-bread
 ```
 
-## Network
+## Network & deps
 
 - VOTD: `GET https://api.midvash.com/v1/votd?language=en&version=web`
 - Versions list: `GET https://api.midvash.com/v1/versions?language=en`
 - Verse pages: `https://midvash.com/en/{version}/{book}/{chapter}/{verse}`
+- **Deps:** Python 3 stdlib only (`urllib`). Optional clipboard helpers:
+  `wl-copy` / `xclip` / `xsel` (shell fallback when Quickshell clipboard
+  unavailable). Optional `xdg-open` for Open.
 
 Outbound HTTPS on bootstrap (if cache miss), version change, or middle-click
 refresh. No auth. No signup.
 
-User-Agent: `DailyBread/0.1 (Omarchy unofficial; harris.daily-bread)`.
+User-Agent: `DailyBread/0.1.1 (Omarchy unofficial; harris.daily-bread)`.
 
-Cache (daily, keyed by **date + version**): `~/.cache/daily-bread/votd.json`.
+**Timezone:** the VOTD “day” key is **UTC** (same verse worldwide for a given
+UTC calendar date). Cache file: `~/.cache/daily-bread/votd.json` keyed by
+**UTC date + version**.
 
 English version slugs known live (2026-08-23): `web`, `kjv`, `esv`, `niv`,
 `nkjv`, `nlt`, `msg`, `asv`, `ylt`, `dra`, `bbe`, `geneva1599` (schema exposes
 the common seven; chips show four).
+
+**Attribution:** Midvash public API. Default WEB is public domain / CC0.
+Other translations remain under their publishers’ copyrights — personal
+display only via the API.
 
 ## Scripts
 
@@ -154,16 +173,17 @@ python3 scripts/votd.py --version web --language en
 ## Layout
 
 ```
-manifest.json          # harris.daily-bread @ 0.1.0
+manifest.json          # harris.daily-bread @ 0.1.1
 BarWidget.qml          # bar entry + Loader → Panel; middle-click refresh
-Panel.qml              # verse + chips + actions
-DailyBreadStore.qml         # cache, Process → votd.py
+Panel.qml              # verse + chips + actions (Flickable)
+DailyBreadStore.qml    # cache, Process → votd.py
 qmldir
 scripts/votd.py
 docs/preview/index.html
 preview.svg
 preview.png
 DESIGN.md
+PRE-AUDIT.md
 REPO.md
 LICENSE                # MIT
 README.md
@@ -180,8 +200,9 @@ README.md
 
 ## Preview
 
-Open `docs/preview/index.html` in a browser for a filled HTML mock (v0.1.0)
-with today’s sample (Jeremiah 33:3 WEB). Marketplace card: `preview.png`.
+Open `docs/preview/index.html` in a browser for a filled HTML mock (v0.1.1)
+with today’s sample (Jeremiah 33:3 WEB). Marketplace card: `preview.png`
+(also embedded above).
 
 ## License
 

@@ -4,13 +4,12 @@ import Quickshell.Io
 
 // Daily Bread — runs scripts/votd.py via Process; parses JSON stdout.
 // Midvash public VOTD only. No API keys.
-// Caches daily verse to ~/.cache/daily-bread/votd.json keyed by date+version.
+// Caches daily verse to ~/.cache/daily-bread/votd.json keyed by UTC date+version.
 QtObject {
   id: store
 
   property string version: "web"
   property string language: "en"
-  property bool panelOpen: false
 
   property bool loading: false
   property string lastError: ""
@@ -27,7 +26,6 @@ QtObject {
   property var verseEnd: null
   property string dataSource: "none"  // disk | network | none
   property string votdBuf: ""
-  property bool forceRefresh: false
 
   readonly property var quickVersions: [
     { slug: "web", label: "WEB" },
@@ -77,9 +75,11 @@ QtObject {
   readonly property bool hasVerse: !!(store.text && String(store.text).length
                                       && store.reference && String(store.reference).length)
 
-  readonly property string lastUpdatedText: formatUpdated(store.fetchedAt)
+  readonly property bool showingCached: store.hasVerse
+    && (store.dataSource === "disk"
+        || (store.lastError && String(store.lastError).indexOf("offline") >= 0))
 
-  signal dataChanged()
+  readonly property string lastUpdatedText: formatUpdated(store.fetchedAt)
 
   function normalizeVersion(slug) {
     var s = String(slug || "web").trim().toLowerCase()
@@ -97,7 +97,6 @@ QtObject {
       var next = store.normalizeVersion(opts.version)
       if (next !== store.version) {
         store.version = next
-        // Version change → refresh (cache miss or new key)
         Qt.callLater(function() { store.refresh(false) })
       } else {
         store.version = next
@@ -105,7 +104,6 @@ QtObject {
     }
     if (opts.language !== undefined)
       store.language = store.normalizeLanguage(opts.language)
-    store.dataChanged()
   }
 
   function formatUpdated(iso) {
@@ -124,11 +122,12 @@ QtObject {
     toastClear.restart()
   }
 
+  // VOTD day key is UTC (same verse worldwide for a given UTC calendar day).
   function todayIso() {
     var d = new Date()
-    var y = d.getFullYear()
-    var m = d.getMonth() + 1
-    var day = d.getDate()
+    var y = d.getUTCFullYear()
+    var m = d.getUTCMonth() + 1
+    var day = d.getUTCDate()
     return y + "-" + (m < 10 ? "0" : "") + m + "-" + (day < 10 ? "0" : "") + day
   }
 
@@ -139,19 +138,20 @@ QtObject {
       return false
     }
     try {
-      if (typeof Quickshell !== "undefined" && Quickshell.clipboard) {
-        Quickshell.clipboard.text = t
+      if (typeof Quickshell !== "undefined" && Quickshell.clipboardText !== undefined) {
+        Quickshell.clipboardText = t
         store.showToast("Copied")
         return true
       }
     } catch (e) {}
+    // Shell fallback: exactly one of wl-copy / xclip / xsel; bash -c (not -lc).
+    // Toast only on copyProc success (onExited) — never claim Copied early.
     copyProc.command = [
-      "bash", "-lc",
-      "printf '%s' \"$1\" | (command -v wl-copy >/dev/null && wl-copy || command -v xclip >/dev/null && xclip -selection clipboard || command -v xsel >/dev/null && xsel --clipboard --input || cat >/dev/null)",
+      "bash", "-c",
+      't="$1"; if command -v wl-copy >/dev/null 2>&1; then printf "%s" "$t" | wl-copy; elif command -v xclip >/dev/null 2>&1; then printf "%s" "$t" | xclip -selection clipboard; elif command -v xsel >/dev/null 2>&1; then printf "%s" "$t" | xsel --clipboard --input; else exit 127; fi',
       "daily-bread-copy", t
     ]
     copyProc.running = true
-    store.showToast("Copied")
     return true
   }
 
@@ -175,15 +175,15 @@ QtObject {
       return false
     }
     try {
-      Qt.openUrlExternally(u)
-      store.showToast("Opened")
-      return true
-    } catch (e) {
-      openUrlProc.command = ["xdg-open", u]
-      openUrlProc.running = true
-      store.showToast("Opened")
-      return true
-    }
+      var ok = Qt.openUrlExternally(u)
+      if (ok !== false) {
+        store.showToast("Opened")
+        return true
+      }
+    } catch (e) {}
+    openUrlProc.command = ["xdg-open", u]
+    openUrlProc.running = true
+    return true
   }
 
   function openVerse() {
@@ -216,13 +216,11 @@ QtObject {
   }
 
   function persistToDisk(obj) {
+    // FileView.setText mkpath — no mkdir Process + Qt.callLater race.
     var body = JSON.stringify(obj || store.buildCacheObject(), null, 2) + "\n"
-    ensureCacheDir.running = true
-    Qt.callLater(function() {
-      try {
-        cacheFile.setText(body)
-      } catch (e) {}
-    })
+    try {
+      cacheFile.setText(body)
+    } catch (e) {}
   }
 
   function applyPayload(obj, source) {
@@ -232,7 +230,6 @@ QtObject {
     if (payload.ok === false && !(payload.text && payload.reference)) {
       store.lastError = String(payload.error || "fetch failed")
       store.dataSource = source || store.dataSource
-      store.dataChanged()
       return false
     }
     store.reference = String(payload.reference || "")
@@ -247,7 +244,6 @@ QtObject {
     store.verseEnd = payload.verse_end !== undefined ? payload.verse_end : null
     store.lastError = payload.error ? String(payload.error) : ""
     store.dataSource = source || "network"
-    store.dataChanged()
     return !!(store.reference && store.text)
   }
 
@@ -283,7 +279,6 @@ QtObject {
   function refresh(force) {
     if (store.loading && votdProc.running)
       return
-    store.forceRefresh = !!force
     // Try cache first unless forced
     if (!force) {
       try {
@@ -304,7 +299,6 @@ QtObject {
       "--language", store.normalizeLanguage(store.language)
     ]
     votdProc.running = true
-    store.dataChanged()
   }
 
   function onVotdFinished(exitCode) {
@@ -312,15 +306,15 @@ QtObject {
     var raw = store.votdBuf || ""
     store.votdBuf = ""
     if (!raw.length) {
-      // Keep last verse if we have one (offline)
+      // Keep last verse if we have one (offline honesty — never fake fresh)
       if (store.hasVerse) {
-        store.lastError = "offline — showing last verse"
-        store.showToast("Offline")
+        store.lastError = "offline — showing last verse (cached)"
+        store.dataSource = "disk"
+        store.showToast("Offline · cached")
       } else {
         store.lastError = "votd produced no output (exit " + exitCode + ")"
         store.showToast("Failed")
       }
-      store.dataChanged()
       return
     }
     var lines = raw.split("\n")
@@ -345,13 +339,16 @@ QtObject {
         store.lastError = String(obj.error || "fetch failed")
         if (!store.hasVerse)
           store.applyPayload({ payload: obj }, "network")
+        else {
+          store.lastError = store.lastError + " — showing last verse (cached)"
+          store.showToast("Cached")
+          return
+        }
         store.showToast(store.lastError)
       }
-      store.dataChanged()
     } catch (e) {
       store.lastError = "votd JSON parse failed"
       store.showToast("Failed")
-      store.dataChanged()
     }
   }
 
@@ -410,19 +407,27 @@ QtObject {
   }
 
   Process {
-    id: ensureCacheDir
-    command: ["mkdir", "-p", store.cacheDir]
-    running: false
-  }
-
-  Process {
     id: copyProc
     running: false
+    onExited: function(exitCode, exitStatus) {
+      if (exitCode === 0)
+        store.showToast("Copied")
+      else if (exitCode === 127)
+        store.showToast("No clipboard tool")
+      else
+        store.showToast("Copy failed")
+    }
   }
 
   Process {
     id: openUrlProc
     running: false
+    onExited: function(exitCode, exitStatus) {
+      if (exitCode === 0)
+        store.showToast("Opened")
+      else
+        store.showToast("Open failed")
+    }
   }
 
   Process {
