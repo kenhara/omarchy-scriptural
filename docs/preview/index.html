@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Daily Bread — HTML mock v0.1.0</title>
+<style>
+  :root {
+    --bg: #000;
+    --fg: rgba(240,240,250,1);
+    --mute: rgba(240,240,250,.45);
+    --surface: rgba(240,240,250,.06);
+    --amber: #e8b861;
+    --ink: #14110a;
+    --font: system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+    --bar-h: 36px;
+    --panel-w: 420px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #000; color: var(--fg); font-family: var(--font); }
+  body {
+    background:
+      radial-gradient(ellipse 55% 40% at 72% 12%, rgba(232,184,97,.12), transparent 55%),
+      linear-gradient(180deg, #0a0a0c, #000);
+  }
+  button { font-family: inherit; }
+  .banner {
+    height: 28px; display: flex; align-items: center; justify-content: center; gap: 14px;
+    background: #121218; border-bottom: 1px solid rgba(240,240,250,.08);
+    font-size: 11px; letter-spacing: .06em; color: var(--mute); font-family: var(--mono);
+  }
+  .bar {
+    height: var(--bar-h); display: flex; align-items: center; justify-content: space-between;
+    padding: 0 12px 0 16px; background: rgba(12,12,14,.88); backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(240,240,250,.06);
+  }
+  .bar-brand { font-size: 11px; letter-spacing: .18em; opacity: .85; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px;
+    border-radius: 6px; background: rgba(240,240,250,.08); font-size: 12px; cursor: pointer;
+    border: none; color: var(--fg);
+  }
+  .pill:hover { background: rgba(240,240,250,.12); }
+  .pill .dot { color: var(--amber); }
+  .wrap { position: relative; height: calc(100% - 28px - var(--bar-h)); overflow: auto; }
+  .hint {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    opacity: .1; letter-spacing: .35em; text-transform: uppercase; font-size: 13px; pointer-events: none;
+  }
+  .panel {
+    position: absolute; top: 16px; right: 16px; width: var(--panel-w);
+    background: linear-gradient(180deg, #121216, #0a0a0c); border: 1px solid rgba(240,240,250,.1);
+    border-radius: 14px; padding: 18px; box-shadow: 0 18px 48px rgba(0,0,0,.65);
+    display: flex; flex-direction: column; gap: 14px;
+    max-height: calc(100% - 32px); overflow: auto;
+  }
+  .head h1 {
+    font-size: 18px; letter-spacing: .12em; font-weight: 700; color: var(--amber);
+  }
+  .head .sub { font-size: 12px; color: var(--mute); margin-top: 6px; }
+  .verse {
+    background: rgba(232,184,97,.08); border: 1px solid rgba(232,184,97,.35);
+    border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px;
+  }
+  .verse .text {
+    font-size: 16px; font-style: italic; line-height: 1.45;
+  }
+  .verse .meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .verse .ref { font-size: 13px; font-weight: 700; }
+  .chip {
+    display: inline-flex; align-items: center; justify-content: center;
+    height: 22px; padding: 0 10px; border-radius: 6px;
+    background: rgba(232,184,97,.2); border: 1px solid rgba(232,184,97,.45);
+    color: var(--amber); font-size: 10px; font-weight: 700; letter-spacing: .12em;
+  }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn {
+    height: 30px; padding: 0 12px; border-radius: 6px; border: 1px solid rgba(240,240,250,.12);
+    background: rgba(240,240,250,.08); color: var(--fg); font-size: 11px; cursor: pointer;
+  }
+  .btn.primary {
+    background: rgba(232,184,97,.22); border-color: rgba(232,184,97,.5); font-weight: 700;
+  }
+  .btn:hover { filter: brightness(1.08); }
+  .section-lbl {
+    font-size: 10px; letter-spacing: .16em; font-weight: 700; color: var(--mute); opacity: .85;
+  }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .tchip {
+    width: 48px; height: 28px; border-radius: 8px; border: 1px solid rgba(240,240,250,.12);
+    background: rgba(240,240,250,.06); color: var(--fg); font-size: 11px; cursor: pointer;
+  }
+  .tchip.on {
+    background: rgba(232,184,97,.28); border-color: rgba(232,184,97,.55);
+    color: var(--amber); font-weight: 700;
+  }
+  .hint-settings { font-size: 10px; color: var(--mute); opacity: .7; margin-top: 6px; }
+  .footer { font-size: 10px; color: var(--mute); opacity: .5; line-height: 1.5; }
+  .toast { font-size: 11px; color: var(--amber); min-height: 14px; }
+</style>
+</head>
+<body>
+  <div class="banner">
+    <span>harris.daily-bread · 0.1.0</span>
+    <span>Midvash public VOTD · unofficial</span>
+    <span>sample 2026-08-23</span>
+  </div>
+  <div class="bar">
+    <div class="bar-brand">OMARCHY</div>
+    <button class="pill" type="button" title="Daily Bread — verse of the day · middle: refresh">
+      <span class="dot">●</span> Jer 33:3
+    </button>
+  </div>
+  <div class="wrap">
+    <div class="hint">pause</div>
+    <div class="panel" role="dialog" aria-label="Daily Bread panel">
+      <div class="head">
+        <h1>DAILY BREAD</h1>
+        <div class="sub">verse of the day · pause</div>
+      </div>
+      <div class="toast">Jer 33:3</div>
+      <div class="verse">
+        <div class="text">‘Call to me, and I will answer you, and will show you great and difficult things, which you don’t know.’</div>
+        <div class="meta">
+          <span class="ref">Jeremiah 33:3</span>
+          <span class="chip">WEB</span>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" type="button">Copy verse</button>
+        <button class="btn" type="button">Copy reference</button>
+        <button class="btn" type="button">Open</button>
+      </div>
+      <div>
+        <div class="section-lbl">TRANSLATION</div>
+        <div class="chips">
+          <button class="tchip on" type="button">WEB</button>
+          <button class="tchip" type="button">KJV</button>
+          <button class="tchip" type="button">ESV</button>
+          <button class="tchip" type="button">NIV</button>
+        </div>
+        <div class="hint-settings">NKJV · NLT · MSG in widget settings</div>
+      </div>
+      <div class="footer">
+        Midvash · unofficial · public API<br />
+        WEB public domain · ESV/NIV/… personal display via API
+      </div>
+    </div>
+  </div>
+</body>
+</html>

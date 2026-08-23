@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a0a0c"/>
+      <stop offset="100%" stop-color="#000"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="72%" cy="18%" r="45%">
+      <stop offset="0%" stop-color="#e8b861" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#e8b861" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg)"/>
+  <rect width="800" height="500" fill="url(#glow)"/>
+  <!-- bar -->
+  <rect x="0" y="0" width="800" height="40" fill="#0c0c0e" opacity="0.92"/>
+  <text x="20" y="26" fill="#f0f0fa" font-family="system-ui,sans-serif" font-size="12" letter-spacing="3" opacity="0.85">OMARCHY</text>
+  <rect x="680" y="8" width="100" height="24" rx="6" fill="rgba(240,240,250,0.08)"/>
+  <text x="698" y="25" fill="#e8b861" font-family="system-ui,sans-serif" font-size="12">●</text>
+  <text x="710" y="25" fill="#f0f0fa" font-family="system-ui,sans-serif" font-size="12">Jer 33:3</text>
+  <!-- panel -->
+  <rect x="340" y="56" width="420" height="420" rx="14" fill="#121216" stroke="rgba(240,240,250,0.1)"/>
+  <text x="360" y="92" fill="#e8b861" font-family="system-ui,sans-serif" font-size="18" font-weight="700" letter-spacing="2">DAILY BREAD</text>
+  <text x="360" y="114" fill="rgba(240,240,250,0.5)" font-family="system-ui,sans-serif" font-size="12">verse of the day · pause</text>
+  <rect x="360" y="132" width="380" height="150" rx="12" fill="rgba(232,184,97,0.08)" stroke="rgba(232,184,97,0.35)"/>
+  <foreignObject x="376" y="148" width="348" height="90">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="color:#f0f0fa;font:italic 15px system-ui,sans-serif;line-height:1.4">
+      ‘Call to me, and I will answer you, and will show you great and difficult things, which you don’t know.’
+    </div>
+  </foreignObject>
+  <text x="376" y="260" fill="#f0f0fa" font-family="system-ui,sans-serif" font-size="13" font-weight="700">Jeremiah 33:3</text>
+  <rect x="500" y="244" width="46" height="22" rx="6" fill="rgba(232,184,97,0.2)" stroke="rgba(232,184,97,0.45)"/>
+  <text x="510" y="259" fill="#e8b861" font-family="system-ui,sans-serif" font-size="10" font-weight="700" letter-spacing="1">WEB</text>
+  <!-- actions -->
+  <rect x="360" y="300" width="92" height="30" rx="6" fill="rgba(232,184,97,0.22)" stroke="rgba(232,184,97,0.5)"/>
+  <text x="378" y="320" fill="#f0f0fa" font-family="system-ui,sans-serif" font-size="11" font-weight="700">Copy verse</text>
+  <rect x="460" y="300" width="110" height="30" rx="6" fill="rgba(240,240,250,0.08)" stroke="rgba(240,240,250,0.12)"/>
+  <text x="474" y="320" fill="#f0f0fa" font-family="system-ui,sans-serif" font-size="11">Copy reference</text>
+  <rect x="580" y="300" width="56" height="30" rx="6" fill="rgba(240,240,250,0.08)" stroke="rgba(240,240,250,0.12)"/>
+  <text x="594" y="320" fill="#f0f0fa" font-family="system-ui,sans-serif" font-size="11" font-weight="700">Open</text>
+  <!-- chips -->
+  <text x="360" y="360" fill="rgba(240,240,250,0.4)" font-family="system-ui,sans-serif" font-size="10" font-weight="700" letter-spacing="2">TRANSLATION</text>
+  <rect x="360" y="372" width="48" height="28" rx="8" fill="rgba(232,184,97,0.28)" stroke="rgba(232,184,97,0.55)"/>
+  <text x="372" y="390" fill="#e8b861" font-family="system-ui,sans-serif" font-size="11" font-weight="700">WEB</text>
+  <rect x="416" y="372" width="48" height="28" rx="8" fill="rgba(240,240,250,0.06)" stroke="rgba(240,240,250,0.12)"/>
+  <text x="428" y="390" fill="#f0f0fa" font-family="system-ui,sans-serif" font-size="11">KJV</text>
+  <rect x="472" y="372" width="48" height="28" rx="8" fill="rgba(240,240,250,0.06)" stroke="rgba(240,240,250,0.12)"/>
+  <text x="484" y="390" fill="#f0f0fa" font-family="system-ui,sans-serif" font-size="11">ESV</text>
+  <rect x="528" y="372" width="48" height="28" rx="8" fill="rgba(240,240,250,0.06)" stroke="rgba(240,240,250,0.12)"/>
+  <text x="540" y="390" fill="#f0f0fa" font-family="system-ui,sans-serif" font-size="11">NIV</text>
+  <text x="360" y="430" fill="rgba(240,240,250,0.22)" font-family="system-ui,sans-serif" font-size="10">Midvash · unofficial · public API</text>
+  <text x="360" y="448" fill="rgba(240,240,250,0.18)" font-family="system-ui,sans-serif" font-size="9">WEB public domain · ESV/NIV/… personal display via API</text>
+</svg>

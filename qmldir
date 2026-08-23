@@ -1,0 +1,3 @@
+# Daily Bread — local module types.
+# Prefer instantiating DailyBreadStore from BarWidget and injecting into Panel.
+DailyBreadStore 1.0 DailyBreadStore.qml

@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "id": "harris.daily-bread",
+  "name": "Daily Bread",
+  "version": "0.1.0",
+  "author": "Harris Kenny",
+  "license": "MIT",
+  "description": "Verse of the day. Pause. Unofficial.",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "keywords": [
+    "daily bread",
+    "bible",
+    "verse",
+    "votd",
+    "scripture",
+    "daily verse",
+    "midvash"
+  ],
+  "barWidget": {
+    "displayName": "Daily Bread",
+    "description": "Verse of the day. Pause. Midvash public VOTD. Unofficial.",
+    "category": "Lifestyle",
+    "allowMultiple": false,
+    "defaultSection": "right",
+    "aliases": [
+      "daily bread",
+      "bible",
+      "verse",
+      "votd",
+      "scripture",
+      "daily verse"
+    ],
+    "defaults": {
+      "version": "web",
+      "language": "en"
+    },
+    "schema": [
+      {
+        "key": "version",
+        "type": "enum",
+        "label": "Bible version",
+        "description": "English translation slug for Midvash VOTD. Default web (World English Bible, public domain).",
+        "options": [
+          "web",
+          "kjv",
+          "esv",
+          "niv",
+          "nkjv",
+          "nlt",
+          "msg"
+        ],
+        "defaultValue": "web"
+      },
+      {
+        "key": "language",
+        "type": "enum",
+        "label": "Language",
+        "description": "API language code. MVP UI is English-only; leave en.",
+        "options": [
+          "en"
+        ],
+        "defaultValue": "en"
+      }
+    ]
+  }
+}
