@@ -143,7 +143,9 @@ BarWidget {
     id: button
     anchors.fill: parent
     bar: root.bar
-    text: scripturalStore.barLabel || "● SCR"
+    // FA book (\uf02d) — tintable; WidgetButton uses bar.fontFamily (Nerd Font)
+    text: scripturalStore.barLabel || "\uf02d"
+    fontSize: Style.font.caption
     horizontalMargin: 8.5
     tooltipText: {
       var tip = "Scriptural — verse of the day · middle: refresh"

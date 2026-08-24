@@ -32,15 +32,15 @@ bar. Personal unofficial client for Midvash public VOTD. No API keys.
 
 ## Bar
 
-Short ref **lingers** when loaded (`Jer 33:3`) else `● Bread`. Left click
+Short ref **lingers** when loaded (book glyph + `Jer 33:3`) else glyph alone. Left click
 toggles panel. Tooltip: *Scriptural — verse of the day · middle: refresh*.
 Middle click refreshes. Right-click: none (host default).
 
 ## Panel
 
-1. Big **SCRIPTURAL** + *verse of the day · pause*
+1. Book glyph + **SCRIPTURAL** + *verse of the day*
 2. Large verse text + reference + version chip (+ **cached** when disk/offline)
-3. Actions: Copy verse · Copy reference · Open (hover feedback)
+3. Actions: Copy · Copy ref · Open (glyph+label chips, hover)
 4. Translation chips: web · kjv · esv · niv · nkjv · nlt · msg (mirrored to settings)
 5. Quiet footer: Midvash · unofficial · public API · VOTD day = UTC
 

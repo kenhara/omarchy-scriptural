@@ -5,7 +5,7 @@ import qs.Ui
 
 // Nested details panel for Scriptural (loaded by BarWidget — not a separate kind).
 // KeyboardPanel shell (Compliantish/Rocketlauncher).
-// Verse of the day · pause. Midvash public VOTD.
+// Verse of the day. Midvash public VOTD.
 Panel {
   id: root
   moduleName: "kenhara.scriptural"
@@ -85,17 +85,28 @@ Panel {
             width: parent.width
             spacing: Style.space(6)
 
-            Text {
-              text: "SCRIPTURAL"
-              color: root.scripturalAccent
-              font.family: root.contentFontFamily
-              font.pixelSize: Style.font.body
-              font.bold: true
-              font.letterSpacing: 3.2
+            Row {
+              spacing: Style.space(8)
+              Text {
+                text: "\uf02d"
+                color: root.scripturalAccent
+                font.family: root.contentFontFamily
+                font.pixelSize: Style.font.body
+                anchors.verticalCenter: parent.verticalCenter
+              }
+              Text {
+                text: "SCRIPTURAL"
+                color: root.scripturalAccent
+                font.family: root.contentFontFamily
+                font.pixelSize: Style.font.body
+                font.bold: true
+                font.letterSpacing: 3.2
+                anchors.verticalCenter: parent.verticalCenter
+              }
             }
 
             Text {
-              text: "verse of the day · pause"
+              text: "verse of the day"
               color: root.contentForeground
               opacity: 0.5
               font.family: root.contentFontFamily
@@ -228,89 +239,26 @@ Panel {
             wrapMode: Text.WordWrap
           }
 
-          // Actions
+          // Actions — compact glyph+label chips (Encyclopedic style)
           Row {
             spacing: Style.space(8)
             visible: liveStore && liveStore.hasVerse
 
-            Rectangle {
-              id: copyVerseBtn
-              width: Style.space(92)
-              height: Style.space(30)
-              radius: Style.space(6)
-              color: copyVerseMa.containsMouse
-                ? Qt.rgba(root.scripturalAccent.r, root.scripturalAccent.g, root.scripturalAccent.b, 0.34)
-                : Qt.rgba(root.scripturalAccent.r, root.scripturalAccent.g, root.scripturalAccent.b, 0.22)
-              border.width: 1
-              border.color: Qt.rgba(root.scripturalAccent.r, root.scripturalAccent.g, root.scripturalAccent.b, 0.5)
-              Text {
-                anchors.centerIn: parent
-                text: "Copy verse"
-                color: root.contentForeground
-                font.family: root.contentFontFamily
-                font.pixelSize: Style.font.bodySmall
-                font.bold: true
-              }
-              MouseArea {
-                id: copyVerseMa
-                anchors.fill: parent
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                onClicked: if (liveStore) liveStore.copyVerse()
-              }
+            ActionChip {
+              glyph: "\uf0c5"
+              label: "Copy"
+              accent: true
+              onClicked: if (liveStore) liveStore.copyVerse()
             }
-
-            Rectangle {
-              id: copyRefBtn
-              width: Style.space(110)
-              height: Style.space(30)
-              radius: Style.space(6)
-              color: copyRefMa.containsMouse
-                ? Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.14)
-                : Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.08)
-              border.width: 1
-              border.color: Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.12)
-              Text {
-                anchors.centerIn: parent
-                text: "Copy reference"
-                color: root.contentForeground
-                font.family: root.contentFontFamily
-                font.pixelSize: Style.font.bodySmall
-              }
-              MouseArea {
-                id: copyRefMa
-                anchors.fill: parent
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                onClicked: if (liveStore) liveStore.copyReference()
-              }
+            ActionChip {
+              glyph: "\uf02d"
+              label: "Copy ref"
+              onClicked: if (liveStore) liveStore.copyReference()
             }
-
-            Rectangle {
-              id: openBtn
-              width: Style.space(56)
-              height: Style.space(30)
-              radius: Style.space(6)
-              color: openMa.containsMouse
-                ? Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.14)
-                : Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.08)
-              border.width: 1
-              border.color: Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.12)
-              Text {
-                anchors.centerIn: parent
-                text: "Open"
-                color: root.contentForeground
-                font.family: root.contentFontFamily
-                font.pixelSize: Style.font.bodySmall
-                font.bold: true
-              }
-              MouseArea {
-                id: openMa
-                anchors.fill: parent
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                onClicked: if (liveStore) liveStore.openVerse()
-              }
+            ActionChip {
+              glyph: "\uf08e"
+              label: "Open"
+              onClicked: if (liveStore) liveStore.openVerse()
             }
           }
 
@@ -413,6 +361,62 @@ Panel {
           }
         }
       }
+    }
+  }
+
+  // Compact glyph+label chips (FA/Nerd, tintable). Copy / Copy ref / Open.
+  component ActionChip: Rectangle {
+    id: chip
+    property string glyph: ""
+    property string label: ""
+    property bool accent: false
+    signal clicked()
+
+    readonly property bool hovered: chipMa.containsMouse
+
+    implicitWidth: chipRow.implicitWidth + Style.space(16)
+    implicitHeight: Style.space(26)
+    width: implicitWidth
+    height: implicitHeight
+    radius: 6
+    color: chip.accent
+      ? (chip.hovered
+          ? Qt.rgba(root.scripturalAccent.r, root.scripturalAccent.g, root.scripturalAccent.b, 0.34)
+          : Qt.rgba(root.scripturalAccent.r, root.scripturalAccent.g, root.scripturalAccent.b, 0.22))
+      : (chip.hovered
+          ? Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.14)
+          : Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.08))
+    border.width: 1
+    border.color: chip.accent
+      ? Qt.rgba(root.scripturalAccent.r, root.scripturalAccent.g, root.scripturalAccent.b, 0.5)
+      : Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.12)
+
+    Row {
+      id: chipRow
+      anchors.centerIn: parent
+      spacing: Style.space(6)
+      Text {
+        text: chip.glyph
+        color: chip.accent ? root.scripturalAccent : root.contentForeground
+        font.family: root.contentFontFamily
+        font.pixelSize: Style.font.caption
+        anchors.verticalCenter: parent.verticalCenter
+      }
+      Text {
+        text: chip.label
+        color: root.contentForeground
+        font.family: root.contentFontFamily
+        font.pixelSize: Style.font.caption
+        font.bold: chip.accent
+        anchors.verticalCenter: parent.verticalCenter
+      }
+    }
+    MouseArea {
+      id: chipMa
+      anchors.fill: parent
+      hoverEnabled: true
+      cursorShape: Qt.PointingHandCursor
+      onClicked: chip.clicked()
     }
   }
 }

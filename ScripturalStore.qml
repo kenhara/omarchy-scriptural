@@ -122,12 +122,13 @@ Item {
   }
   readonly property string votdPath: pluginDir + "/scripts/votd.py"
 
-  readonly property string barGlyph: "●"
+  // FA book (\uf02d) — tintable via Text.color; color emoji is not.
+  readonly property string barGlyph: "\uf02d"
   readonly property string barLabel: {
     var shortRef = store.shortReference
     if (shortRef && shortRef.length)
-      return shortRef
-    return store.barGlyph + " Bread"
+      return store.barGlyph + " " + shortRef
+    return store.barGlyph
   }
 
   readonly property string shortReference: {

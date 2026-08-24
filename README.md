@@ -11,7 +11,10 @@ Powered by the **Midvash** public VOTD API. No API keys. No publisher chrome.
 **ID:** `kenhara.scriptural`  
 **Author:** Harris Kenny  
 **License:** MIT  
-**Version:** 0.1.13
+**Version:** 0.1.14
+
+### 0.1.14
+- Tintable FA book bar chip (glyph + short ref); glyph'd Copy / Copy ref / Open; drop "pause" from subheader.
 
 ### 0.1.13
 - KeyboardPanel + PanelKeyCatcher shell (Compliantish/Rocketlauncher) so nested bar-widget panels open on Quattro VPS; BarWidget toggle warns if panelLoader.item is null.
@@ -142,7 +145,7 @@ python3 scripts/votd.py --list-versions --language en
 
 ## Usage
 
-1. **Left-click** bar (`Jer 33:3` or `● Bread`) → panel.
+1. **Left-click** bar (book glyph + `Jer 33:3`, or glyph alone) → panel.
 2. Read today’s verse, reference, and version chip.
 3. **Copy verse** / **Copy reference** / **Open** (Midvash URL).
 4. Tap a translation chip (WEB · KJV · ESV · NIV · NKJV · NLT · MSG) to switch.
