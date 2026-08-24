@@ -29,7 +29,7 @@ Panel {
   readonly property color surfaceColor: Qt.rgba(
     contentForeground.r, contentForeground.g, contentForeground.b, 0.06)
   readonly property color dimForeground: Qt.darker(contentForeground, 1.45)
-  readonly property color dailyBreadAccent: Qt.rgba(0.91, 0.72, 0.38, 1.0)
+  readonly property color scripturalAccent: Qt.rgba(0.91, 0.72, 0.38, 1.0)
 
   readonly property var liveStore: store
 
@@ -84,8 +84,8 @@ Panel {
           spacing: Style.space(6)
 
           Text {
-            text: "DAILY BREAD"
-            color: root.dailyBreadAccent
+            text: "SCRIPTURAL"
+            color: root.scripturalAccent
             font.family: root.contentFontFamily
             font.pixelSize: Style.font.title
             font.bold: true
@@ -117,7 +117,7 @@ Panel {
           width: parent.width
           visible: liveStore && liveStore.toastText && liveStore.toastText.length
           text: liveStore ? liveStore.toastText : ""
-          color: root.dailyBreadAccent
+          color: root.scripturalAccent
           font.family: root.contentFontFamily
           font.pixelSize: Style.font.bodySmall
         }
@@ -128,9 +128,9 @@ Panel {
           visible: liveStore && liveStore.hasVerse
           height: visible ? verseInner.implicitHeight + Style.space(28) : 0
           radius: Style.space(12)
-          color: Qt.rgba(root.dailyBreadAccent.r, root.dailyBreadAccent.g, root.dailyBreadAccent.b, 0.08)
+          color: Qt.rgba(root.scripturalAccent.r, root.scripturalAccent.g, root.scripturalAccent.b, 0.08)
           border.width: 1
-          border.color: Qt.rgba(root.dailyBreadAccent.r, root.dailyBreadAccent.g, root.dailyBreadAccent.b, 0.35)
+          border.color: Qt.rgba(root.scripturalAccent.r, root.scripturalAccent.g, root.scripturalAccent.b, 0.35)
 
           Column {
             id: verseInner
@@ -170,9 +170,9 @@ Panel {
                 width: chipLabel.implicitWidth + Style.space(14)
                 height: Style.space(22)
                 radius: Style.space(6)
-                color: Qt.rgba(root.dailyBreadAccent.r, root.dailyBreadAccent.g, root.dailyBreadAccent.b, 0.2)
+                color: Qt.rgba(root.scripturalAccent.r, root.scripturalAccent.g, root.scripturalAccent.b, 0.2)
                 border.width: 1
-                border.color: Qt.rgba(root.dailyBreadAccent.r, root.dailyBreadAccent.g, root.dailyBreadAccent.b, 0.45)
+                border.color: Qt.rgba(root.scripturalAccent.r, root.scripturalAccent.g, root.scripturalAccent.b, 0.45)
                 anchors.verticalCenter: parent.verticalCenter
 
                 Text {
@@ -180,7 +180,7 @@ Panel {
                   anchors.centerIn: parent
                   text: liveStore ? (liveStore.versionChip || "WEB") : "WEB"
                   textFormat: Text.PlainText
-                  color: root.dailyBreadAccent
+                  color: root.scripturalAccent
                   font.family: root.contentFontFamily
                   font.pixelSize: Style.font.caption
                   font.bold: true
@@ -237,10 +237,10 @@ Panel {
             height: Style.space(30)
             radius: Style.space(6)
             color: copyVerseMa.containsMouse
-              ? Qt.rgba(root.dailyBreadAccent.r, root.dailyBreadAccent.g, root.dailyBreadAccent.b, 0.34)
-              : Qt.rgba(root.dailyBreadAccent.r, root.dailyBreadAccent.g, root.dailyBreadAccent.b, 0.22)
+              ? Qt.rgba(root.scripturalAccent.r, root.scripturalAccent.g, root.scripturalAccent.b, 0.34)
+              : Qt.rgba(root.scripturalAccent.r, root.scripturalAccent.g, root.scripturalAccent.b, 0.22)
             border.width: 1
-            border.color: Qt.rgba(root.dailyBreadAccent.r, root.dailyBreadAccent.g, root.dailyBreadAccent.b, 0.5)
+            border.color: Qt.rgba(root.scripturalAccent.r, root.scripturalAccent.g, root.scripturalAccent.b, 0.5)
             Text {
               anchors.centerIn: parent
               text: "Copy verse"
@@ -353,19 +353,19 @@ Panel {
                   if (chipMa.containsMouse && !selected)
                     return Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.12)
                   if (selected)
-                    return Qt.rgba(root.dailyBreadAccent.r, root.dailyBreadAccent.g, root.dailyBreadAccent.b, 0.28)
+                    return Qt.rgba(root.scripturalAccent.r, root.scripturalAccent.g, root.scripturalAccent.b, 0.28)
                   return Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.06)
                 }
                 border.width: 1
                 border.color: selected
-                  ? Qt.rgba(root.dailyBreadAccent.r, root.dailyBreadAccent.g, root.dailyBreadAccent.b, 0.55)
+                  ? Qt.rgba(root.scripturalAccent.r, root.scripturalAccent.g, root.scripturalAccent.b, 0.55)
                   : Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.12)
 
                 Text {
                   id: chipText
                   anchors.centerIn: parent
                   text: modelData.label || String(modelData.slug || "").toUpperCase()
-                  color: selected ? root.dailyBreadAccent : root.contentForeground
+                  color: selected ? root.scripturalAccent : root.contentForeground
                   font.family: root.contentFontFamily
                   font.pixelSize: Style.font.bodySmall
                   font.bold: selected

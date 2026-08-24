@@ -17,14 +17,14 @@ BarWidget {
     : false
 
   // Soft amber / parchment accent — quiet pause vibe
-  readonly property color dailyBreadAccent: Qt.rgba(0.91, 0.72, 0.38, 1.0)
+  readonly property color scripturalAccent: Qt.rgba(0.91, 0.72, 0.38, 1.0)
 
   property string version: {
     try {
       if (root.settings && root.settings.version !== undefined)
-        return dailyBreadStore.normalizeVersion(root.settings.version)
+        return scripturalStore.normalizeVersion(root.settings.version)
       if (typeof root.setting === "function")
-        return dailyBreadStore.normalizeVersion(root.setting("version", "web"))
+        return scripturalStore.normalizeVersion(root.setting("version", "web"))
     } catch (e) {}
     return "web"
   }
@@ -32,9 +32,9 @@ BarWidget {
   property string language: {
     try {
       if (root.settings && root.settings.language !== undefined)
-        return dailyBreadStore.normalizeLanguage(root.settings.language)
+        return scripturalStore.normalizeLanguage(root.settings.language)
       if (typeof root.setting === "function")
-        return dailyBreadStore.normalizeLanguage(root.setting("language", "en"))
+        return scripturalStore.normalizeLanguage(root.setting("language", "en"))
     } catch (e) {}
     return "en"
   }
@@ -60,7 +60,7 @@ BarWidget {
 
   // Local name — middle-click force-refreshes VOTD (not a framework hook).
   function refreshVotd() {
-    dailyBreadStore.refresh(true)
+    scripturalStore.refresh(true)
   }
 
   function injectPanel() {
@@ -70,11 +70,11 @@ BarWidget {
     if ("settings" in target) target.settings = root.settings
     if ("anchorItem" in target) target.anchorItem = button
     if ("hostWidget" in target) target.hostWidget = root
-    if ("store" in target) target.store = dailyBreadStore
+    if ("store" in target) target.store = scripturalStore
   }
 
   function syncStoreSettings() {
-    dailyBreadStore.applySettings({
+    scripturalStore.applySettings({
       version: root.version,
       language: root.language
     })
@@ -84,7 +84,7 @@ BarWidget {
   function mirrorVersion(slug) {
     if (!root.settings) return
     try {
-      root.settings.version = dailyBreadStore.normalizeVersion(slug)
+      root.settings.version = scripturalStore.normalizeVersion(slug)
     } catch (e) {}
   }
 
@@ -97,7 +97,7 @@ BarWidget {
   onLanguageChanged: syncStoreSettings()
 
   ScripturalStore {
-    id: dailyBreadStore
+    id: scripturalStore
     onVersionChosen: function(slug) {
       root.mirrorVersion(slug)
     }
@@ -122,15 +122,15 @@ BarWidget {
     id: button
     anchors.fill: parent
     bar: root.bar
-    text: dailyBreadStore.barLabel || "● Bread"
+    text: scripturalStore.barLabel || "● SCR"
     horizontalMargin: 8.5
     tooltipText: {
       var tip = "Scriptural — verse of the day · middle: refresh"
-      if (dailyBreadStore.loading)
+      if (scripturalStore.loading)
         tip = "Scriptural — refreshing… · middle: refresh"
-      else if (dailyBreadStore.reference) {
-        tip = "Scriptural — " + dailyBreadStore.reference
-        if (dailyBreadStore.showingCached)
+      else if (scripturalStore.reference) {
+        tip = "Scriptural — " + scripturalStore.reference
+        if (scripturalStore.showingCached)
           tip += " (cached)"
         tip += " · middle: refresh"
       }

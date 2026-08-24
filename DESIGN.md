@@ -38,7 +38,7 @@ Middle click refreshes. Right-click: none (host default).
 
 ## Panel
 
-1. Big **DAILY BREAD** + *verse of the day · pause*
+1. Big **SCRIPTURAL** + *verse of the day · pause*
 2. Large verse text + reference + version chip (+ **cached** when disk/offline)
 3. Actions: Copy verse · Copy reference · Open (hover feedback)
 4. Translation chips: web · kjv · esv · niv · nkjv · nlt · msg (mirrored to settings)
