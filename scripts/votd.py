@@ -2,7 +2,7 @@
 """Scriptural — Midvash verse of the day (no auth).
 
 CLI for Omarchy / omarchy-shell bar-widget.
-User-Agent version is read from manifest.json (fallback 0.1.18).
+User-Agent version is read from manifest.json (fallback 0.1.19).
 
 Unofficial. Not affiliated with Midvash or any Bible publisher.
 Copyrighted translations (ESV/NIV/…) are for personal display via public API.
@@ -12,7 +12,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
+import stat
 import sys
 import urllib.error
 import urllib.parse
@@ -28,6 +30,7 @@ PLUGIN_ID = "kenhara.scriptural"
 MAX_HTTP_BYTES = 1 << 20
 _HTTP_CHUNK = 65536
 MAX_RESPONSE_BYTES = 65536
+MAX_CACHE_BYTES = 262144
 MAX_TEXT_CHARS = 8192
 MAX_REF_CHARS = 512
 MAX_URL_CHARS = 2048
@@ -50,7 +53,7 @@ def read_manifest_version() -> str:
             return ver
     except Exception:
         pass
-    return "0.1.18"
+    return "0.1.19"
 
 
 VERSION = read_manifest_version()
@@ -286,6 +289,62 @@ def list_versions(language: str) -> None:
     )
 
 
+
+def load_cache(path: str) -> None:
+    """Bounded, trust-path cache read.
+
+    Opens O_NOFOLLOW | O_NONBLOCK and requires a regular file, so a symlink or
+    FIFO planted at the predictable cache path can neither redirect the read nor
+    block the helper. Oversize / missing / not-a-dict → exit 1 (no cache).
+
+    Writes cache bytes to stdout directly — do not use emit() (64 KiB cap).
+    """
+    flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0)
+    data = b""
+    fd = -1
+    try:
+        fd = os.open(path, flags)
+        st = os.fstat(fd)
+        if not stat.S_ISREG(st.st_mode):
+            raise SystemExit(1)
+        remaining = MAX_CACHE_BYTES + 1
+        while remaining > 0:
+            chunk = os.read(fd, min(65536, remaining))
+            if not chunk:
+                break
+            data += chunk
+            remaining -= len(chunk)
+    except SystemExit:
+        raise
+    except Exception:
+        raise SystemExit(1)
+    finally:
+        if fd >= 0:
+            try:
+                os.close(fd)
+            except Exception:
+                pass
+    if len(data) > MAX_CACHE_BYTES:
+        try:
+            sys.stderr.write("cache too large\n")
+            sys.stderr.flush()
+        except Exception:
+            pass
+        raise SystemExit(1)
+    try:
+        obj = json.loads(data.decode("utf-8"))
+    except Exception:
+        raise SystemExit(1)
+    if not isinstance(obj, dict):
+        raise SystemExit(1)
+    # Valid regular JSON object: write bytes ourselves (emit() is 64 KiB).
+    if not data.endswith(b"\n"):
+        data += b"\n"
+    sys.stdout.buffer.write(data)
+    sys.stdout.buffer.flush()
+    raise SystemExit(0)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Scriptural — Midvash verse of the day (unofficial, no auth)"
@@ -310,7 +369,16 @@ def main() -> None:
         action="store_true",
         help="List English versions from Midvash instead of VOTD",
     )
+    parser.add_argument(
+        "--load-cache",
+        default="",
+        metavar="PATH",
+        help="Load a cache JSON file with O_NOFOLLOW|O_NONBLOCK (no network)",
+    )
     args = parser.parse_args()
+    cache_path = str(args.load_cache or "").strip()
+    if cache_path:
+        load_cache(cache_path)
     version = normalize_version(args.version)
     language = normalize_language(args.language)
 

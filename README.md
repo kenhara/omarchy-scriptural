@@ -11,7 +11,10 @@ Powered by the **Midvash** public VOTD API. No API keys. No publisher chrome.
 **ID:** `kenhara.scriptural`  
 **Author:** Harris Kenny  
 **License:** MIT  
-**Version:** 0.1.18
+**Version:** 0.1.19
+
+### 0.1.19
+- Harden cache read: reject symlink/FIFO trust path (HC-05). Reads go through `votd.py --load-cache` (`O_NOFOLLOW|O_NONBLOCK`, regular file only).
 
 ### 0.1.18
 - Bound HTTP, stdout, and cache reads (marketplace #2219).

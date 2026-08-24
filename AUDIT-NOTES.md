@@ -19,3 +19,9 @@ Fixes from [AUDIT.md](AUDIT.md) against v0.1.3 @ `7a4f382`. No marketplace submi
 - `python3 scripts/votd.py --dry-run --version web` → exit 2
 - Invalid version → English `error` (not Portuguese)
 - `rg '0\.1\.2' README.md docs/preview preview.svg` — only changelog / history if any
+
+## 0.1.19 — HC-05 cache trust path
+
+| ID | Finding | Fix |
+|----|---------|-----|
+| **HC-05** | `cacheReadProc` used `head -c` on `~/.cache/scriptural/votd.json` — follows a symlink and can block forever on a FIFO | `votd.py --load-cache` opens `O_RDONLY\|O_NOFOLLOW\|O_NONBLOCK`, requires `S_ISREG`, bounded read of `MAX_CACHE_BYTES` (256 KiB). Missing / symlink / FIFO / oversize / not-a-dict → **exit 1** (empty/tiny stdout). Valid dict → JSON on stdout, **exit 0**. Cache body is written directly (not via `emit()`, which caps at 64 KiB). FileView remains write-only. |

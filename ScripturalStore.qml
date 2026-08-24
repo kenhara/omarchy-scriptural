@@ -587,7 +587,7 @@ Item {
     path: store.cachePath
     watchChanges: false
     // Quiet UI: Framework errors off; persistToDisk logs failures itself.
-    // Reads go through cacheReadProc (head -c); FileView is write-only (setText).
+    // FileView writes only; reads via votd.py --load-cache (O_NOFOLLOW|O_NONBLOCK).
     printErrors: false
   }
 
@@ -599,7 +599,8 @@ Item {
   Process {
     id: cacheReadProc
     running: false
-    command: ["head", "-c", String(store.maxCacheBytes), "--", store.cachePath]
+    command: ["python3", "-B", store.votdPath, "--load-cache", store.cachePath]
+    environment: ({ "PYTHONDONTWRITEBYTECODE": "1" })
     stdout: SplitParser {
       onRead: function(line) {
         if (store.cacheBuf.length <= store.maxCacheBytes)
