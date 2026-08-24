@@ -14,7 +14,7 @@ Patch bump for marketplace discoverability before UTM smoke: `barWidget.category
 Lifestyle → Widgets (0.1.3); 0.1.5 moves Widgets → **Info**. Expanded `keywords`
 + `barWidget.aliases` kept for filing drafts only.
 
-Omarchy Quattro pre-ship pass for `harris.scriptural`. Builds on
+Omarchy Quattro pre-ship pass for `kenhara.scriptural`. Builds on
 `PRE-AUDIT.md` (0.1.1) plus Encyclopedic marketplace lessons.
 
 ## Checklist

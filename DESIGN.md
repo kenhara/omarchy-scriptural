@@ -1,7 +1,7 @@
 # Scriptural — design notes
 
 **Status:** 0.1.5 (audit fixes · Info category)  
-**Id:** `harris.scriptural`  
+**Id:** `kenhara.scriptural`  
 **Peers:** Encyclopedic, Enricherino, Compliantish, Rocketlauncher
 
 ## Why
@@ -49,7 +49,7 @@ Middle click refreshes. Right-click: none (host default).
 - VOTD: `GET https://api.midvash.com/v1/votd?language=en&version=web`
 - Versions: `GET https://api.midvash.com/v1/versions?language=en`
 - Default: `web` (World English Bible, public domain / CC0)
-- UA: `Scriptural/<manifest version> (Omarchy unofficial; harris.scriptural)`
+- UA: `Scriptural/<manifest version> (Omarchy unofficial; kenhara.scriptural)`
 - Day key: **UTC** calendar date
 
 ## Non-goals

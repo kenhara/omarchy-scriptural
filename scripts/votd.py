@@ -23,7 +23,7 @@ from typing import Any
 
 VOTD_URL = "https://api.midvash.com/v1/votd"
 VERSIONS_URL = "https://api.midvash.com/v1/versions"
-PLUGIN_ID = "harris.scriptural"
+PLUGIN_ID = "kenhara.scriptural"
 
 # Midvash sometimes returns Portuguese error strings — map to English for UI.
 _PT_ERROR_MAP = [
@@ -43,7 +43,7 @@ def read_manifest_version() -> str:
             return ver
     except Exception:
         pass
-    return "0.1.5"
+    return "0.1.6"
 
 
 VERSION = read_manifest_version()

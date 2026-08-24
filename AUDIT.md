@@ -1,4 +1,4 @@
-# Audit — `harris.scriptural` (Omarchy plugin) v0.1.3
+# Audit — `kenhara.scriptural` (Omarchy plugin) v0.1.3
 
 ## Context
 

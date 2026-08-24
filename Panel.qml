@@ -7,7 +7,7 @@ import qs.Ui
 // 0.1.5 — verse of the day · pause. Midvash public VOTD.
 Panel {
   id: root
-  moduleName: "harris.scriptural"
+  moduleName: "kenhara.scriptural"
   manageIpc: false
 
   property var anchorItem: null

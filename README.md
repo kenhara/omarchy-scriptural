@@ -8,10 +8,13 @@ Daily scripture for Omarchy — bar **lingers** on today’s short reference
 (`Jer 33:3`), panel shows the verse. Named for the familiar prayer line.
 Powered by the **Midvash** public VOTD API. No API keys. No publisher chrome.
 
-**ID:** `harris.scriptural`  
+**ID:** `kenhara.scriptural`  
 **Author:** Harris Kenny  
 **License:** MIT  
-**Version:** 0.1.5
+**Version:** 0.1.6
+
+### 0.1.6
+- Renamed plugin id `harris.scriptural` → `kenhara.scriptural` (install path `~/.config/omarchy/plugins/kenhara.scriptural`). Display name unchanged.
 
 ### 0.1.5
 - Audit fixes: honest discoverability (`Info` category); cache mkdir + persist
@@ -74,7 +77,7 @@ Display name stays **Scriptural** (prayer allusion; no publisher as title).
 
 ```sh
 omarchy plugin add https://github.com/kenhara/omarchy-scriptural.git --enable
-omarchy bar move harris.scriptural --section right
+omarchy bar move kenhara.scriptural --section right
 ```
 
 ### Local copy (this tree)
@@ -84,12 +87,12 @@ machine:
 
 ```sh
 mkdir -p ~/.config/omarchy/plugins
-cp -a . ~/.config/omarchy/plugins/harris.scriptural
+cp -a . ~/.config/omarchy/plugins/kenhara.scriptural
 
-omarchy plugin validate ~/.config/omarchy/plugins/harris.scriptural
+omarchy plugin validate ~/.config/omarchy/plugins/kenhara.scriptural
 omarchy-shell shell rescanPlugins
 
-omarchy bar move harris.scriptural --section right
+omarchy bar move kenhara.scriptural --section right
 ```
 
 Hot reload applies on save under `~/.config/omarchy/plugins/`.
@@ -98,7 +101,7 @@ Hot reload applies on save under `~/.config/omarchy/plugins/`.
 
 ```sh
 mkdir -p ~/.config/omarchy/plugins
-ln -sfn /path/to/omarchy-scriptural ~/.config/omarchy/plugins/harris.scriptural
+ln -sfn /path/to/omarchy-scriptural ~/.config/omarchy/plugins/kenhara.scriptural
 omarchy-shell shell rescanPlugins
 ```
 
@@ -148,7 +151,7 @@ with a **cached** chip — never presented as a fresh network fetch.
 ## Remove
 
 ```sh
-omarchy plugin remove harris.scriptural
+omarchy plugin remove kenhara.scriptural
 ```
 
 Optional cache cleanup:
@@ -169,7 +172,7 @@ rm -rf ~/.cache/scriptural
 Outbound HTTPS on bootstrap (if cache miss), version change, or middle-click
 refresh. No auth. No signup.
 
-User-Agent: `Scriptural/<manifest version> (Omarchy unofficial; harris.scriptural)`
+User-Agent: `Scriptural/<manifest version> (Omarchy unofficial; kenhara.scriptural)`
 (version read from `manifest.json`).
 
 **Timezone:** the VOTD “day” key is **UTC** (same verse worldwide for a given
@@ -201,7 +204,7 @@ string.
 ## Layout
 
 ```
-manifest.json          # harris.scriptural @ 0.1.5
+manifest.json          # kenhara.scriptural @ 0.1.5
 BarWidget.qml          # bar entry + Loader → Panel; middle-click refresh
 Panel.qml              # verse + chips + actions (Flickable)
 ScripturalStore.qml    # cache, Process → votd.py
