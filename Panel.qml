@@ -335,29 +335,14 @@ Panel {
           }
 
           // Quiet footer
-          Column {
+          Text {
             width: parent.width
-            spacing: Style.space(4)
-
-            Text {
-              width: parent.width
-              text: "Midvash · unofficial · public API · VOTD day = UTC"
-              color: root.contentForeground
-              opacity: 0.22
-              font.family: root.contentFontFamily
-              font.pixelSize: Style.font.caption
-              wrapMode: Text.WordWrap
-            }
-
-            Text {
-              width: parent.width
-              text: "WEB public domain · ESV/NIV/… personal display via API — translation © holders"
-              color: root.contentForeground
-              opacity: 0.18
-              font.family: root.contentFontFamily
-              font.pixelSize: Style.font.caption
-              wrapMode: Text.WordWrap
-            }
+            text: "Unofficial · Midvash · WEB public domain"
+            color: root.contentForeground
+            opacity: 0.22
+            font.family: root.contentFontFamily
+            font.pixelSize: Style.font.caption
+            wrapMode: Text.WordWrap
           }
         }
       }
