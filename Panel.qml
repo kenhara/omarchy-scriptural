@@ -87,7 +87,7 @@ Panel {
             text: "SCRIPTURAL"
             color: root.scripturalAccent
             font.family: root.contentFontFamily
-            font.pixelSize: Style.font.title
+            font.pixelSize: Style.font.body
             font.bold: true
             font.letterSpacing: 3.2
           }
@@ -146,7 +146,7 @@ Panel {
               textFormat: Text.PlainText
               color: root.contentForeground
               font.family: root.contentFontFamily
-              font.pixelSize: Style.font.title
+              font.pixelSize: Style.font.body
               font.italic: true
               wrapMode: Text.WordWrap
               lineHeight: 1.35
@@ -161,7 +161,7 @@ Panel {
                 textFormat: Text.PlainText
                 color: root.contentForeground
                 font.family: root.contentFontFamily
-                font.pixelSize: Style.font.subtitle
+                font.pixelSize: Style.font.body
                 font.bold: true
                 anchors.verticalCenter: parent.verticalCenter
               }
