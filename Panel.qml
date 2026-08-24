@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import qs.Commons
 import qs.Ui
+import "."
 
 // Nested details panel for Scriptural (loaded by BarWidget — not a separate kind).
 // 0.1.5 — verse of the day · pause. Midvash public VOTD.

@@ -11,7 +11,10 @@ Powered by the **Midvash** public VOTD API. No API keys. No publisher chrome.
 **ID:** `kenhara.scriptural`  
 **Author:** Harris Kenny  
 **License:** MIT  
-**Version:** 0.1.6
+**Version:** 0.1.9
+
+### 0.1.9
+- Panel `import "."` so Loader resolves sibling types; best-effort panel load error in tooltip.
 
 ### 0.1.6
 - Renamed plugin id `harris.scriptural` → `kenhara.scriptural` (install path `~/.config/omarchy/plugins/kenhara.scriptural`). Display name unchanged.
