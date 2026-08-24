@@ -1,6 +1,6 @@
 # Daily Bread — design notes
 
-**Status:** 0.1.3 (discoverability · Widgets category)  
+**Status:** 0.1.4 (audit fixes · Info category)  
 **Id:** `harris.daily-bread`  
 **Peers:** Fair Witness, Yellow Pixels, Security Theater, Space Jockey
 
@@ -16,7 +16,7 @@ bar. Personal unofficial client for Midvash public VOTD. No API keys.
 | `bar-widget` + nested `Panel.qml` | Same — no separate panel kind |
 | Named `Style.font.*` tokens | No `Style.font.size(N)` |
 | Theme tokens | Soft amber accent on title + chips; `Style.space` / `bar.foreground` |
-| Schema knobs early | `version` enum + reserved `language` (`en`) |
+| Schema knobs early | `version` enum (seven); `language=en` in defaults/code only |
 | Honest empty/error/cache | Toast on miss; **cached** chip offline; quiet Midvash footer |
 | Ship extras | `preview.png` README hero, Remove / Security / Network |
 | Cache last success | `~/.cache/daily-bread/votd.json` keyed by **UTC date + version** |
@@ -28,6 +28,7 @@ bar. Personal unofficial client for Midvash public VOTD. No API keys.
 | PlainText on API text | Verse + reference `textFormat: Text.PlainText` |
 | https-only Open | Refuse non-`https:` remote URLs |
 | UA from manifest | `scripts/votd.py` reads `manifest.json` |
+| Discoverability honesty | keywords/aliases = filing docs; loader ignores; category **Info** |
 
 ## Bar
 
@@ -40,7 +41,7 @@ Middle click refreshes. Right-click: none (host default).
 1. Big **DAILY BREAD** + *verse of the day · pause*
 2. Large verse text + reference + version chip (+ **cached** when disk/offline)
 3. Actions: Copy verse · Copy reference · Open (hover feedback)
-4. Translation chips row (web|kjv|esv|niv; rest in settings)
+4. Translation chips: web · kjv · esv · niv · nkjv · nlt · msg (mirrored to settings)
 5. Quiet footer: Midvash · unofficial · public API · VOTD day = UTC
 
 ## Data

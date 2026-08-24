@@ -11,7 +11,12 @@ Powered by the **Midvash** public VOTD API. No API keys. No publisher chrome.
 **ID:** `harris.daily-bread`  
 **Author:** Harris Kenny  
 **License:** MIT  
-**Version:** 0.1.3
+**Version:** 0.1.4
+
+### 0.1.4
+- Audit fixes: honest discoverability (`Info` category); cache mkdir + persist
+  logging; chip version write-back; all seven versions on chips; English API
+  errors; shortReference abbrevs; chip highlight follows displayed verse.
 
 ### 0.1.3
 - Discoverability: category **Widgets**; expanded `keywords` + restored `barWidget.aliases` for search docs; honest note.
@@ -54,13 +59,14 @@ this plugin only surfaces Midvash’s `version` field and a quiet footer.
 
 ## Discoverability
 
-Marketplace filing: **Widgets** · tags `bar, quickshell` (suggest missing tag:
-`faith` or `bible`).
+Marketplace filing draft: category **Info** (same family as stock weather) ·
+tags `bar, quickshell` (suggest missing tag: `faith` or `bible`).
 
-Top-level `keywords` in `manifest.json` may help marketplace/search (Bible,
-VOTD, KJV, NIV, ESV, Midvash, devotion, etc.). `barWidget.aliases` are for
-discovery docs and human search — the bar loader may not index them. Display
-name stays **Daily Bread** (prayer allusion; no publisher as title).
+Top-level `keywords` and `barWidget.aliases` in `manifest.json` are for
+**marketplace filing drafts and human search docs** (Bible, VOTD, KJV, NIV,
+ESV, Midvash, devotion, etc.). The Omarchy **bar-widget loader ignores them**
+when resolving bar widgets — they do not make the widget appear in bar search.
+Display name stays **Daily Bread** (prayer allusion; no publisher as title).
 
 ## Install
 
@@ -103,10 +109,10 @@ Open **widget settings** for Daily Bread (optional):
 | Schema key | Label | Default |
 |------------|-------|---------|
 | `version` | Bible version (`web` `kjv` `esv` `niv` `nkjv` `nlt` `msg`) | `web` |
-| `language` | Language (MVP English-only) | `en` |
 
-No API keys. Public read only. Panel chips cover web|kjv|esv|niv; the rest live
-in settings.
+Language is fixed to `en` in code / `defaults` (no schema knob until multi-lang
+is real). No API keys. Public read only. Panel chips cover **all seven** schema
+versions; chip choice mirrors into settings when the host allows write-back.
 
 CLI smoke:
 
@@ -121,7 +127,7 @@ python3 scripts/votd.py --list-versions --language en
 1. **Left-click** bar (`Jer 33:3` or `● Bread`) → panel.
 2. Read today’s verse, reference, and version chip.
 3. **Copy verse** / **Copy reference** / **Open** (Midvash URL).
-4. Tap a translation chip (WEB · KJV · ESV · NIV) to switch; rest in settings.
+4. Tap a translation chip (WEB · KJV · ESV · NIV · NKJV · NLT · MSG) to switch.
 5. **Middle-click** bar forces a network refresh (cache bypass).
 
 Offline: last successful verse for that **UTC date + version** stays on screen
@@ -171,8 +177,8 @@ UTC calendar date). Cache file: `~/.cache/daily-bread/votd.json` keyed by
 **UTC date + version**.
 
 English version slugs known live (2026-08-23): `web`, `kjv`, `esv`, `niv`,
-`nkjv`, `nlt`, `msg`, `asv`, `ylt`, `dra`, `bbe`, `geneva1599` (schema exposes
-the common seven; chips show four).
+`nkjv`, `nlt`, `msg`, `asv`, `ylt`, `dra`, `bbe`, `geneva1599` (schema + chips
+expose the common seven).
 
 **Attribution:** Midvash public API. Default WEB is public domain / CC0.
 Other translations remain under their publishers’ copyrights — personal
@@ -189,11 +195,13 @@ python3 scripts/votd.py --version web --language en
 ```
 
 `--dry-run` and network errors emit structured error JSON (non-zero exit).
+User-facing `error` is English; optional `error_detail` may carry the raw API
+string.
 
 ## Layout
 
 ```
-manifest.json          # harris.daily-bread @ 0.1.2
+manifest.json          # harris.daily-bread @ 0.1.4
 BarWidget.qml          # bar entry + Loader → Panel; middle-click refresh
 Panel.qml              # verse + chips + actions (Flickable)
 DailyBreadStore.qml    # cache, Process → votd.py
@@ -205,6 +213,8 @@ preview.png
 DESIGN.md
 PRE-AUDIT.md
 PRE-SHIP.md
+AUDIT.md
+AUDIT-NOTES.md
 REPO.md
 LICENSE                # MIT
 README.md
@@ -221,7 +231,7 @@ README.md
 
 ## Preview
 
-Open `docs/preview/index.html` in a browser for a filled HTML mock (v0.1.3)
+Open `docs/preview/index.html` in a browser for a filled HTML mock (v0.1.4)
 with today’s sample (Jeremiah 33:3 WEB). Marketplace card: `preview.png`
 (also embedded above).
 

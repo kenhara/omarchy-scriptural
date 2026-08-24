@@ -4,7 +4,7 @@ import qs.Commons
 import qs.Ui
 
 // Nested details panel for Daily Bread (loaded by BarWidget — not a separate kind).
-// 0.1.2 — verse of the day · pause. Midvash public VOTD.
+// 0.1.4 — verse of the day · pause. Midvash public VOTD.
 Panel {
   id: root
   moduleName: "harris.daily-bread"
@@ -336,13 +336,17 @@ Panel {
                 { slug: "web", label: "WEB" },
                 { slug: "kjv", label: "KJV" },
                 { slug: "esv", label: "ESV" },
-                { slug: "niv", label: "NIV" }
+                { slug: "niv", label: "NIV" },
+                { slug: "nkjv", label: "NKJV" },
+                { slug: "nlt", label: "NLT" },
+                { slug: "msg", label: "MSG" }
               ]
               delegate: Rectangle {
                 required property var modelData
                 property bool selected: liveStore
-                  && liveStore.normalizeVersion(liveStore.version) === String(modelData.slug)
-                width: Style.space(48)
+                  ? liveStore.chipSelected(modelData.slug)
+                  : false
+                width: Math.max(Style.space(48), chipText.implicitWidth + Style.space(16))
                 height: Style.space(28)
                 radius: Style.space(8)
                 color: {
@@ -358,6 +362,7 @@ Panel {
                   : Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.12)
 
                 Text {
+                  id: chipText
                   anchors.centerIn: parent
                   text: modelData.label || String(modelData.slug || "").toUpperCase()
                   color: selected ? root.dailyBreadAccent : root.contentForeground
@@ -377,15 +382,6 @@ Panel {
             }
           }
 
-          Text {
-            width: parent.width
-            text: "NKJV · NLT · MSG in widget settings"
-            color: root.contentForeground
-            opacity: 0.32
-            font.family: root.contentFontFamily
-            font.pixelSize: Style.font.caption
-            wrapMode: Text.WordWrap
-          }
         }
 
         // Quiet footer

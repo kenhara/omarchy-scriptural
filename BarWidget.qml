@@ -16,9 +16,6 @@ BarWidget {
     ? panelLoader.item.popoutSwitchClosing === true
     : false
 
-  readonly property color foreground: root.bar ? root.bar.foreground : Color.foreground
-  readonly property string fontFamily: root.bar ? root.bar.fontFamily : "monospace"
-
   // Soft amber / parchment accent — quiet pause vibe
   readonly property color dailyBreadAccent: Qt.rgba(0.91, 0.72, 0.38, 1.0)
 
@@ -83,6 +80,14 @@ BarWidget {
     })
   }
 
+  // Best-effort write-back so chip setVersion survives reload.
+  function mirrorVersion(slug) {
+    if (!root.settings) return
+    try {
+      root.settings.version = dailyBreadStore.normalizeVersion(slug)
+    } catch (e) {}
+  }
+
   onBarChanged: injectPanel()
   onSettingsChanged: {
     injectPanel()
@@ -93,6 +98,9 @@ BarWidget {
 
   DailyBreadStore {
     id: dailyBreadStore
+    onVersionChosen: function(slug) {
+      root.mirrorVersion(slug)
+    }
   }
 
   Component.onCompleted: {

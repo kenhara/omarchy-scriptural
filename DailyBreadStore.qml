@@ -26,13 +26,83 @@ QtObject {
   property var verseEnd: null
   property string dataSource: "none"  // disk | network | none
   property string votdBuf: ""
+  // Version requested by the latest in-flight fetch (for chip revert on failure).
+  property string pendingVersion: ""
+
+  // Best-effort write-back so chip choice survives reload (BarWidget mirrors).
+  signal versionChosen(string slug)
 
   readonly property var quickVersions: [
     { slug: "web", label: "WEB" },
     { slug: "kjv", label: "KJV" },
     { slug: "esv", label: "ESV" },
-    { slug: "niv", label: "NIV" }
+    { slug: "niv", label: "NIV" },
+    { slug: "nkjv", label: "NKJV" },
+    { slug: "nlt", label: "NLT" },
+    { slug: "msg", label: "MSG" }
   ]
+
+  // Sensible bar abbreviations for multi-word / numbered books.
+  readonly property var bookAbbrevMap: ({
+    "song of solomon": "Song",
+    "song of songs": "Song",
+    "psalms": "Ps",
+    "psalm": "Ps",
+    "lamentations": "Lam",
+    "philippians": "Phil",
+    "thessalonians": "Thess",
+    "revelation": "Rev",
+    "ecclesiastes": "Eccl",
+    "deuteronomy": "Deut",
+    "chronicles": "Chr",
+    "corinthians": "Cor",
+    "colossians": "Col",
+    "ephesians": "Eph",
+    "galatians": "Gal",
+    "hebrews": "Heb",
+    "jeremiah": "Jer",
+    "zechariah": "Zech",
+    "zephaniah": "Zeph",
+    "habakkuk": "Hab",
+    "malachi": "Mal",
+    "matthew": "Matt",
+    "james": "Jas",
+    "jude": "Jude",
+    "job": "Job",
+    "joel": "Joel",
+    "amos": "Amos",
+    "obadiah": "Obad",
+    "jonah": "Jonah",
+    "micah": "Mic",
+    "nahum": "Nah",
+    "haggai": "Hag",
+    "hosea": "Hos",
+    "isaiah": "Isa",
+    "ezekiel": "Ezek",
+    "daniel": "Dan",
+    "joshua": "Josh",
+    "judges": "Judg",
+    "ruth": "Ruth",
+    "ezra": "Ezra",
+    "nehemiah": "Neh",
+    "esther": "Esth",
+    "proverbs": "Prov",
+    "mark": "Mark",
+    "luke": "Luke",
+    "john": "Jn",
+    "acts": "Acts",
+    "romans": "Rom",
+    "titus": "Titus",
+    "philemon": "Phlm",
+    "peter": "Pet",
+    "timothy": "Tim",
+    "samuel": "Sam",
+    "kings": "Kgs",
+    "genesis": "Gen",
+    "exodus": "Exod",
+    "leviticus": "Lev",
+    "numbers": "Num",
+  })
 
   readonly property string cacheDir: Quickshell.env("HOME") + "/.cache/daily-bread"
   readonly property string cachePath: cacheDir + "/votd.json"
@@ -60,19 +130,41 @@ QtObject {
   readonly property string shortReference: {
     var ref = String(store.reference || "").trim()
     if (!ref.length) return ""
-    // Jeremiah 33:3 → Jer 33:3 (first word truncated to 3–4 letters when long)
-    var m = ref.match(/^([1-3]?\s*[A-Za-z]+)\s+(\d+:\d+(?:-\d+)?)/)
+    // Book (multi-word OK) + chapter:verse — e.g. "Song of Solomon 1:1", "1 John 3:16"
+    var m = ref.match(/^(.+?)\s+(\d+:\d+(?:-\d+)?)\s*$/)
     if (!m) return ref
     var book = String(m[1] || "").trim()
     var nums = String(m[2] || "").trim()
-    var parts = book.split(/\s+/)
-    var abbr
-    if (parts.length === 2 && /^[1-3]$/.test(parts[0])) {
-      abbr = parts[0] + parts[1].slice(0, 3)
-    } else {
-      abbr = book.length > 4 ? book.slice(0, 3) : book
+    var lower = book.toLowerCase()
+    var mapped = store.bookAbbrevMap[lower]
+    if (mapped)
+      return mapped + " " + nums
+    // Numbered books: "1 John" → look up "john" with number prefix
+    var numBook = lower.match(/^([1-3])\s+(.+)$/)
+    if (numBook) {
+      var restMap = store.bookAbbrevMap[numBook[2]]
+      if (restMap)
+        return numBook[1] + restMap + " " + nums
+      var rest = String(numBook[2] || "")
+      var shortRest = rest.length > 3 ? rest.slice(0, 3) : rest
+      return numBook[1] + shortRest.charAt(0).toUpperCase() + shortRest.slice(1) + " " + nums
     }
-    return abbr + " " + nums
+    // Fallback: first three letters of first word when long
+    var parts = book.split(/\s+/)
+    if (parts.length >= 2) {
+      // Multi-word unknown: first letters of significant words (Song of X → SoX-ish) or first word trunc
+      var significant = parts.filter(function(p) {
+        var l = p.toLowerCase()
+        return l !== "of" && l !== "the" && l !== "and"
+      })
+      if (significant.length >= 2) {
+        var abbr = significant.map(function(p) { return p.charAt(0).toUpperCase() }).join("")
+        return abbr + " " + nums
+      }
+    }
+    var one = parts[0] || book
+    var abbrOne = one.length > 4 ? one.slice(0, 3) : one
+    return abbrOne + " " + nums
   }
 
   readonly property string versionChip: {
@@ -88,6 +180,15 @@ QtObject {
         || (store.lastError && String(store.lastError).indexOf("offline") >= 0))
 
   readonly property string lastUpdatedText: formatUpdated(store.fetchedAt)
+
+  // Chip highlight: prefer displayed verseVersion so a failed switch doesn't lie.
+  function chipSelected(slug) {
+    var want = String(slug || "").toLowerCase()
+    if (store.hasVerse && store.verseVersion && String(store.verseVersion).length) {
+      return store.normalizeVersion(store.verseVersion) === want
+    }
+    return store.normalizeVersion(store.version) === want
+  }
 
   function normalizeVersion(slug) {
     var s = String(slug || "web").trim().toLowerCase()
@@ -217,6 +318,7 @@ QtObject {
       return
     }
     store.version = next
+    store.versionChosen(next)
     store.refresh(false)
   }
 
@@ -233,12 +335,21 @@ QtObject {
     }
   }
 
+  function ensureCacheDir() {
+    mkdirProc.command = ["mkdir", "-p", "--", store.cacheDir]
+    mkdirProc.running = true
+  }
+
   function persistToDisk(obj) {
-    // FileView.setText mkpath — no mkdir Process + Qt.callLater race.
+    // Ensure ~/.cache/daily-bread exists, then FileView.setText (mkpath belt+suspenders).
+    store.ensureCacheDir()
     var body = JSON.stringify(obj || store.buildCacheObject(), null, 2) + "\n"
     try {
       cacheFile.setText(body)
-    } catch (e) {}
+    } catch (e) {
+      console.log("Daily Bread: cache write failed:", e)
+      store.lastError = "cache write failed"
+    }
   }
 
   function applyPayload(obj, source) {
@@ -310,6 +421,7 @@ QtObject {
     store.loading = true
     store.lastError = ""
     store.votdBuf = ""
+    store.pendingVersion = store.normalizeVersion(store.version)
     votdProc.command = [
       "python3",
       store.votdPath,
@@ -317,6 +429,14 @@ QtObject {
       "--language", store.normalizeLanguage(store.language)
     ]
     votdProc.running = true
+  }
+
+  function revertVersionToDisplayed() {
+    var shown = store.normalizeVersion(store.verseVersion || "")
+    if (shown && shown.length && shown !== store.normalizeVersion(store.version)) {
+      store.version = shown
+      store.versionChosen(shown)
+    }
   }
 
   function onVotdFinished(exitCode) {
@@ -328,11 +448,13 @@ QtObject {
       if (store.hasVerse) {
         store.lastError = "offline — showing last verse (cached)"
         store.dataSource = "disk"
+        store.revertVersionToDisplayed()
         store.showToast("Offline · cached")
       } else {
         store.lastError = "votd produced no output (exit " + exitCode + ")"
         store.showToast("Failed")
       }
+      store.pendingVersion = ""
       return
     }
     var lines = raw.split("\n")
@@ -354,23 +476,31 @@ QtObject {
         store.persistToDisk(store.buildCacheObject(obj, store.fetchedAt))
         store.showToast(store.shortReference || "Updated")
       } else {
-        store.lastError = String(obj.error || "fetch failed")
+        var eng = String(obj.error || "fetch failed")
+        var detail = obj.error_detail ? String(obj.error_detail) : ""
+        store.lastError = detail && detail !== eng ? (eng + " (" + detail + ")") : eng
         if (!store.hasVerse)
           store.applyPayload({ payload: obj }, "network")
         else {
-          store.lastError = store.lastError + " — showing last verse (cached)"
+          store.lastError = eng + " — showing last verse (cached)"
+          store.revertVersionToDisplayed()
           store.showToast("Cached")
+          store.pendingVersion = ""
           return
         }
-        store.showToast(store.lastError)
+        // Toast stays English / short — not raw Portuguese
+        store.showToast(eng)
       }
     } catch (e) {
       store.lastError = "votd JSON parse failed"
+      store.revertVersionToDisplayed()
       store.showToast("Failed")
     }
+    store.pendingVersion = ""
   }
 
   function bootstrap() {
+    store.ensureCacheDir()
     cacheFile.reload()
   }
 
@@ -389,9 +519,18 @@ QtObject {
     id: cacheFile
     path: store.cachePath
     watchChanges: false
+    // Quiet UI: Framework errors off; persistToDisk logs failures itself.
     printErrors: false
     onLoaded: store.onCacheLoaded(text())
-    onLoadFailed: { store.refresh(false) }
+    onLoadFailed: {
+      console.log("Daily Bread: cache load failed — fetching network")
+      store.refresh(false)
+    }
+  }
+
+  Process {
+    id: mkdirProc
+    running: false
   }
 
   Process {
