@@ -26,11 +26,15 @@ Item {
   property var verseEnd: null
   property string dataSource: "none"  // disk | network | none
   property string votdBuf: ""
+  readonly property int maxVotdBufChars: 262144
+  property bool _votdOverflow: false
   // Version requested by the latest in-flight fetch (for chip revert on failure).
   property string pendingVersion: ""
   // Guard: onLoadFailed may schedule at most one network bootstrap (avoids
   // __pycache__ → inotify reload → onLoadFailed → refresh loops).
   property bool _didInitialFetch: false
+  // null = bootstrap cache read; false = refresh(cache-first); true = force.
+  property var _pendingRefreshForce: null
 
   // Best-effort write-back so chip choice survives reload (BarWidget mirrors).
   signal versionChosen(string slug)
@@ -109,6 +113,8 @@ Item {
 
   readonly property string cacheDir: Quickshell.env("HOME") + "/.cache/scriptural"
   readonly property string cachePath: cacheDir + "/votd.json"
+  readonly property int maxCacheBytes: 262144
+  property string cacheBuf: ""
   // Percent-decode so paths with spaces work for python3
   readonly property string pluginDir: {
     var raw = String(Qt.resolvedUrl("."))
@@ -401,30 +407,18 @@ Item {
     }
   }
 
-  function onCacheLoaded(text) {
-    var ok = false
-    if (text && text.length > 2)
-      ok = store.loadDiskText(text)
-    if (!ok)
-      store.refresh(false)
+  function startCacheRead() {
+    if (cacheReadProc.running)
+      return
+    store.cacheBuf = ""
+    cacheReadProc.running = true
   }
 
-  function refresh(force) {
-    if (store.loading && votdProc.running)
-      return
-    // Try cache first unless forced
-    if (!force) {
-      try {
-        var existing = cacheFile.text()
-        if (existing && existing.length > 2 && store.loadDiskText(existing)) {
-          store.showToast("Cached")
-          return
-        }
-      } catch (e) {}
-    }
+  function startVotd() {
     store.loading = true
     store.lastError = ""
     store.votdBuf = ""
+    store._votdOverflow = false
     store.pendingVersion = store.normalizeVersion(store.version)
     votdProc.command = [
       "python3",
@@ -439,6 +433,58 @@ Item {
     votdProc.running = true
   }
 
+  function onCacheReadFinished(exitCode) {
+    var fromRefresh = store._pendingRefreshForce !== null && store._pendingRefreshForce !== undefined
+    var force = store._pendingRefreshForce === true
+    store._pendingRefreshForce = null
+
+    var ok = false
+    if (exitCode === 0 && store.cacheBuf && store.cacheBuf.length > 2)
+      ok = store.loadDiskText(store.cacheBuf)
+
+    if (ok) {
+      if (fromRefresh && !force)
+        store.showToast("Cached")
+      return
+    }
+
+    if (fromRefresh) {
+      store.startVotd()
+      return
+    }
+
+    // Non-trivial stale cache on bootstrap: fetch once (do not loop refresh).
+    if (exitCode === 0 && store.cacheBuf && store.cacheBuf.length > 2) {
+      store.startVotd()
+      return
+    }
+
+    // failure/empty → existing guarded initial fetch. Preserve _didInitialFetch.
+    console.log("Scriptural: cache load failed — no cache yet")
+    store.lastError = "No cache yet"
+    store.dataSource = "none"
+    Qt.callLater(function() {
+      if (store._didInitialFetch)
+        return
+      store._didInitialFetch = true
+      store.refresh(false)
+    })
+  }
+
+  function refresh(force) {
+    if (store.loading && votdProc.running)
+      return
+    store._votdOverflow = false
+    store.votdBuf = ""
+    if (!force) {
+      store._pendingRefreshForce = false
+      store.startCacheRead()
+      return
+    }
+    store._pendingRefreshForce = null
+    store.startVotd()
+  }
+
   function revertVersionToDisplayed() {
     var shown = store.normalizeVersion(store.verseVersion || "")
     if (shown && shown.length && shown !== store.normalizeVersion(store.version)) {
@@ -449,6 +495,17 @@ Item {
 
   function onVotdFinished(exitCode) {
     store.loading = false
+    if (store._votdOverflow) {
+      store.votdBuf = ""
+      if (store.hasVerse) {
+        store.dataSource = "disk"
+        store.revertVersionToDisplayed()
+      } else {
+        store.showToast("Failed")
+      }
+      store.pendingVersion = ""
+      return
+    }
     var raw = store.votdBuf || ""
     store.votdBuf = ""
     if (!raw.length) {
@@ -509,7 +566,9 @@ Item {
 
   function bootstrap() {
     store.ensureCacheDir()
-    cacheFile.reload()
+    store.cacheBuf = ""
+    store._pendingRefreshForce = null
+    store.startCacheRead()
   }
 
   Component.onCompleted: {
@@ -528,25 +587,28 @@ Item {
     path: store.cachePath
     watchChanges: false
     // Quiet UI: Framework errors off; persistToDisk logs failures itself.
+    // Reads go through cacheReadProc (head -c); FileView is write-only (setText).
     printErrors: false
-    onLoaded: store.onCacheLoaded(text())
-    onLoadFailed: {
-      console.log("Scriptural: cache load failed — no cache yet")
-      store.lastError = "No cache yet"
-      store.dataSource = "none"
-      // Single guarded bootstrap; middle-click refresh still works anytime.
-      Qt.callLater(function() {
-        if (store._didInitialFetch)
-          return
-        store._didInitialFetch = true
-        store.refresh(false)
-      })
-    }
   }
 
   Process {
     id: mkdirProc
     running: false
+  }
+
+  Process {
+    id: cacheReadProc
+    running: false
+    command: ["head", "-c", String(store.maxCacheBytes), "--", store.cachePath]
+    stdout: SplitParser {
+      onRead: function(line) {
+        if (store.cacheBuf.length <= store.maxCacheBytes)
+          store.cacheBuf += line + "\n"
+      }
+    }
+    onExited: function(exitCode, exitStatus) {
+      store.onCacheReadFinished(exitCode)
+    }
   }
 
   Process {
@@ -577,7 +639,19 @@ Item {
     id: votdProc
     running: false
     stdout: SplitParser {
-      onRead: function(line) { store.votdBuf += line + "\n" }
+      onRead: function(line) {
+        if (store._votdOverflow)
+          return
+        var extra = String(line || "") + "\n"
+        if (store.votdBuf.length + extra.length > store.maxVotdBufChars) {
+          store._votdOverflow = true
+          store.votdBuf = ""
+          store.lastError = "votd output too large"
+          votdProc.running = false
+          return
+        }
+        store.votdBuf += extra
+      }
     }
     stderr: SplitParser {
       onRead: function(line) {

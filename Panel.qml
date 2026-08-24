@@ -106,7 +106,7 @@ Panel {
             }
 
             Text {
-              text: "verse of the day"
+              text: "Bible verse of the day"
               color: root.contentForeground
               opacity: 0.5
               font.family: root.contentFontFamily
@@ -337,7 +337,7 @@ Panel {
           // Quiet footer
           Text {
             width: parent.width
-            text: "Unofficial · Midvash · WEB public domain"
+            text: "Unofficial · Bible · Midvash · WEB public domain"
             color: root.contentForeground
             opacity: 0.22
             font.family: root.contentFontFamily

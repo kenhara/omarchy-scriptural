@@ -148,11 +148,11 @@ BarWidget {
     fontSize: Style.font.caption
     horizontalMargin: 8.5
     tooltipText: {
-      var tip = "Scriptural — verse of the day · middle: refresh"
+      var tip = "Scriptural — Bible verse of the day · middle: refresh"
       if (scripturalStore.loading)
-        tip = "Scriptural — refreshing… · middle: refresh"
+        tip = "Scriptural — refreshing Bible verse… · middle: refresh"
       else if (scripturalStore.reference) {
-        tip = "Scriptural — " + scripturalStore.reference
+        tip = "Scriptural — Bible · " + scripturalStore.reference
         if (scripturalStore.showingCached)
           tip += " (cached)"
         tip += " · middle: refresh"

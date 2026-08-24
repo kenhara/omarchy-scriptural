@@ -2,16 +2,20 @@
 
 ![Scriptural](preview.png)
 
-Give us this day the verse. Unofficial.
+Give us this day the Bible verse. Unofficial.
 
-Daily scripture for Omarchy — bar **lingers** on today’s short reference
+Daily Bible scripture for Omarchy — bar **lingers** on today’s short reference
 (`Jer 33:3`), panel shows the verse. Named for the familiar prayer line.
 Powered by the **Midvash** public VOTD API. No API keys. No publisher chrome.
 
 **ID:** `kenhara.scriptural`  
 **Author:** Harris Kenny  
 **License:** MIT  
-**Version:** 0.1.17
+**Version:** 0.1.18
+
+### 0.1.18
+- Bound HTTP, stdout, and cache reads (marketplace #2219).
+- Make Bible / scripture wording obvious in panel, footer, manifest, tooltip, and README.
 
 ### 0.1.17
 - Marketplace preview.png is the live Omarchy smoke screenshot.

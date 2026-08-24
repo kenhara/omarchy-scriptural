@@ -2,7 +2,7 @@
 """Scriptural — Midvash verse of the day (no auth).
 
 CLI for Omarchy / omarchy-shell bar-widget.
-User-Agent version is read from manifest.json (fallback 0.1.5).
+User-Agent version is read from manifest.json (fallback 0.1.18).
 
 Unofficial. Not affiliated with Midvash or any Bible publisher.
 Copyrighted translations (ESV/NIV/…) are for personal display via public API.
@@ -25,6 +25,13 @@ VOTD_URL = "https://api.midvash.com/v1/votd"
 VERSIONS_URL = "https://api.midvash.com/v1/versions"
 PLUGIN_ID = "kenhara.scriptural"
 
+MAX_HTTP_BYTES = 1 << 20
+_HTTP_CHUNK = 65536
+MAX_RESPONSE_BYTES = 65536
+MAX_TEXT_CHARS = 8192
+MAX_REF_CHARS = 512
+MAX_URL_CHARS = 2048
+
 # Midvash sometimes returns Portuguese error strings — map to English for UI.
 _PT_ERROR_MAP = [
     (re.compile(r"vers[aã]o\s+n[aã]o\s+encontrada", re.I), "Version not found"),
@@ -43,7 +50,7 @@ def read_manifest_version() -> str:
             return ver
     except Exception:
         pass
-    return "0.1.6"
+    return "0.1.18"
 
 
 VERSION = read_manifest_version()
@@ -52,8 +59,42 @@ USER_AGENT = f"Scriptural/{VERSION} (Omarchy unofficial; {PLUGIN_ID})"
 COMMON_VERSIONS = ("web", "kjv", "esv", "niv", "nkjv", "nlt", "msg")
 
 
+class ResponseTooLarge(Exception):
+    pass
+
+
+def read_capped(fp, limit: int = MAX_HTTP_BYTES) -> bytes:
+    chunks = []
+    total = 0
+    while True:
+        chunk = fp.read(_HTTP_CHUNK)
+        if not chunk:
+            break
+        total += len(chunk)
+        if total > limit:
+            raise ResponseTooLarge()
+        chunks.append(chunk)
+    return b"".join(chunks)
+
+
 def emit(obj: dict[str, Any], exit_code: int = 0) -> None:
-    sys.stdout.write(json.dumps(obj, ensure_ascii=False) + "\n")
+    line = json.dumps(obj, ensure_ascii=False)
+    if len(line.encode("utf-8")) > MAX_RESPONSE_BYTES:
+        line = json.dumps(
+            {
+                "ok": False,
+                "reference": "",
+                "text": "",
+                "version": obj.get("version") or "web",
+                "language": obj.get("language") or "en",
+                "url": "",
+                "date": datetime.now(timezone.utc).date().isoformat(),
+                "error": "response too large",
+            },
+            ensure_ascii=False,
+        )
+        exit_code = 1
+    sys.stdout.write(line + "\n")
     sys.stdout.flush()
     raise SystemExit(exit_code)
 
@@ -90,14 +131,19 @@ def http_get_json(url: str, timeout: float = 30.0) -> tuple[int, Any, str]:
     req = urllib.request.Request(url, headers=headers, method="GET")
     try:
         with urllib.request.urlopen(req, timeout=timeout) as resp:
-            raw = resp.read().decode("utf-8", errors="replace")
+            raw = read_capped(resp).decode("utf-8", errors="replace")
             code = getattr(resp, "status", 200) or 200
             try:
                 return code, json.loads(raw) if raw else {}, raw
             except json.JSONDecodeError:
                 return code, {"_raw": raw}, raw
+    except ResponseTooLarge:
+        return 0, {"error": "response too large"}, ""
     except urllib.error.HTTPError as e:
-        raw = e.read().decode("utf-8", errors="replace") if e.fp else ""
+        try:
+            raw = read_capped(e).decode("utf-8", errors="replace") if e.fp else ""
+        except ResponseTooLarge:
+            return int(e.code), {"error": "response too large"}, ""
         try:
             parsed = json.loads(raw) if raw else {"error": str(e.reason)}
         except json.JSONDecodeError:
@@ -126,10 +172,12 @@ def sanitize_https_url(url: str) -> str:
 
 
 def build_ok(payload: dict[str, Any], version: str, language: str) -> dict[str, Any]:
-    ref = str(payload.get("reference") or "").strip()
-    text = str(payload.get("text") or "").strip()
+    ref = str(payload.get("reference") or "").strip()[:MAX_REF_CHARS]
+    text = str(payload.get("text") or "").strip()[:MAX_TEXT_CHARS]
     ver = str(payload.get("version") or version).strip().lower() or version
     url = sanitize_https_url(payload.get("url") or "")
+    if len(url) > MAX_URL_CHARS:
+        url = ""
     return {
         "ok": True,
         "reference": ref,
