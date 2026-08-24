@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "id": "kenhara.scriptural",
   "name": "Scriptural",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "author": "Harris Kenny",
   "license": "MIT",
-  "description": "Give us this day the verse. Pause. Unofficial Midvash Bible verse of the day; not affiliated.",
+  "description": "Give us this day the verse. Unofficial Midvash Bible verse of the day; not affiliated.",
   "kinds": [
     "bar-widget"
   ],
@@ -40,8 +40,8 @@
   ],
   "barWidget": {
     "displayName": "Scriptural",
-    "description": "Verse of the day. A quiet pause. Midvash public VOTD. Unofficial; not affiliated with Midvash or any Bible publisher.",
-    "category": "Info",
+    "description": "Verse of the day. Midvash public VOTD. Unofficial; not affiliated with Midvash or any Bible publisher.",
+    "category": "Widgets",
     "allowMultiple": false,
     "defaultSection": "right",
     "defaults": {

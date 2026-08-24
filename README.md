@@ -2,7 +2,7 @@
 
 ![Scriptural](preview.png)
 
-Give us this day the verse. Pause. Unofficial.
+Give us this day the verse. Unofficial.
 
 Daily scripture for Omarchy — bar **lingers** on today’s short reference
 (`Jer 33:3`), panel shows the verse. Named for the familiar prayer line.
@@ -11,7 +11,13 @@ Powered by the **Midvash** public VOTD API. No API keys. No publisher chrome.
 **ID:** `kenhara.scriptural`  
 **Author:** Harris Kenny  
 **License:** MIT  
-**Version:** 0.1.14
+**Version:** 0.1.16
+
+### 0.1.16
+- Marketplace category Widgets (was Info); drop leftover Pause from pitch; README version catch-up (0.1.15 footer/subheader already shipped).
+
+### 0.1.15
+- Quiet job-line subheader + unofficial footer.
 
 ### 0.1.14
 - Tintable FA book bar chip (glyph + short ref); glyph'd Copy / Copy ref / Open; drop "pause" from subheader.
@@ -80,8 +86,8 @@ this plugin only surfaces Midvash’s `version` field and a quiet footer.
 
 ## Discoverability
 
-Marketplace filing draft: category **Info** (same family as stock weather) ·
-tags `bar, quickshell` (suggest missing tag: `faith` or `bible`).
+Marketplace filing draft: category **Widgets** ·
+tags `bar, quickshell` (suggest missing tag: `bible`).
 
 Top-level `keywords` and `barWidget.aliases` in `manifest.json` are for
 **marketplace filing drafts and human search docs** (Bible, VOTD, KJV, NIV,
