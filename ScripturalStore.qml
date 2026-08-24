@@ -28,6 +28,9 @@ Item {
   property string votdBuf: ""
   // Version requested by the latest in-flight fetch (for chip revert on failure).
   property string pendingVersion: ""
+  // Guard: onLoadFailed may schedule at most one network bootstrap (avoids
+  // __pycache__ → inotify reload → onLoadFailed → refresh loops).
+  property bool _didInitialFetch: false
 
   // Best-effort write-back so chip choice survives reload (BarWidget mirrors).
   signal versionChosen(string slug)
@@ -424,10 +427,14 @@ Item {
     store.pendingVersion = store.normalizeVersion(store.version)
     votdProc.command = [
       "python3",
+      "-B",
       store.votdPath,
       "--version", store.normalizeVersion(store.version),
       "--language", store.normalizeLanguage(store.language)
     ]
+    votdProc.environment = ({
+      "PYTHONDONTWRITEBYTECODE": "1"
+    })
     votdProc.running = true
   }
 
@@ -523,8 +530,16 @@ Item {
     printErrors: false
     onLoaded: store.onCacheLoaded(text())
     onLoadFailed: {
-      console.log("Scriptural: cache load failed — fetching network")
-      store.refresh(false)
+      console.log("Scriptural: cache load failed — no cache yet")
+      store.lastError = "No cache yet"
+      store.dataSource = "none"
+      // Single guarded bootstrap; middle-click refresh still works anytime.
+      Qt.callLater(function() {
+        if (store._didInitialFetch)
+          return
+        store._didInitialFetch = true
+        store.refresh(false)
+      })
     }
   }
 
