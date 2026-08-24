@@ -11,7 +11,10 @@ Powered by the **Midvash** public VOTD API. No API keys. No publisher chrome.
 **ID:** `kenhara.scriptural`  
 **Author:** Harris Kenny  
 **License:** MIT  
-**Version:** 0.1.10
+**Version:** 0.1.11
+
+### 0.1.11
+- Remove Panel `import "."` (was shadowing qs.Ui Panel under Loader → dead bar clicks); sibling types via qmldir/module context like Rocketlauncher.
 
 ### 0.1.10
 - python3 -B + PYTHONDONTWRITEBYTECODE on votd Process; onLoadFailed no longer re-enters refresh loops (single guarded bootstrap); panel load error console.warn + truncated tooltip.
