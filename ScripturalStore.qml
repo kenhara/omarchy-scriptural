@@ -5,7 +5,7 @@ import Quickshell.Io
 // Scriptural — runs scripts/votd.py via Process; parses JSON stdout.
 // Midvash public VOTD only. No API keys.
 // Caches daily verse to ~/.cache/scriptural/votd.json keyed by UTC date+version.
-QtObject {
+Item {
   id: store
 
   property string version: "web"
