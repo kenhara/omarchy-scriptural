@@ -11,7 +11,10 @@ Powered by the **Midvash** public VOTD API. No API keys. No publisher chrome.
 **ID:** `kenhara.scriptural`  
 **Author:** Harris Kenny  
 **License:** MIT  
-**Version:** 0.1.16
+**Version:** 0.1.17
+
+### 0.1.17
+- Marketplace preview.png is the live Omarchy smoke screenshot.
 
 ### 0.1.16
 - Marketplace category Widgets (was Info); drop leftover Pause from pitch; README version catch-up (0.1.15 footer/subheader already shipped).
