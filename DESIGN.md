@@ -1,12 +1,12 @@
-# Daily Bread — design notes
+# Scriptural — design notes
 
-**Status:** 0.1.4 (audit fixes · Info category)  
-**Id:** `harris.daily-bread`  
-**Peers:** Fair Witness, Yellow Pixels, Security Theater, Space Jockey
+**Status:** 0.1.5 (audit fixes · Info category)  
+**Id:** `harris.scriptural`  
+**Peers:** Encyclopedic, Enricherino, Compliantish, Rocketlauncher
 
 ## Why
 
-*Daily Bread* — give us this day the verse. A quiet pause in the Omarchy
+*Scriptural* — give us this day the verse. A quiet pause in the Omarchy
 bar. Personal unofficial client for Midvash public VOTD. No API keys.
 
 ## Shape (playbook lessons)
@@ -19,7 +19,7 @@ bar. Personal unofficial client for Midvash public VOTD. No API keys.
 | Schema knobs early | `version` enum (seven); `language=en` in defaults/code only |
 | Honest empty/error/cache | Toast on miss; **cached** chip offline; quiet Midvash footer |
 | Ship extras | `preview.png` README hero, Remove / Security / Network |
-| Cache last success | `~/.cache/daily-bread/votd.json` keyed by **UTC date + version** |
+| Cache last success | `~/.cache/scriptural/votd.json` keyed by **UTC date + version** |
 | Middle-click useful | Refresh VOTD (force network); tip documents it |
 | MIT + manifest at root | Marketplace layout |
 | Unofficial disclaimer | Not affiliated with Midvash or Bible publishers |
@@ -33,7 +33,7 @@ bar. Personal unofficial client for Midvash public VOTD. No API keys.
 ## Bar
 
 Short ref **lingers** when loaded (`Jer 33:3`) else `● Bread`. Left click
-toggles panel. Tooltip: *Daily Bread — verse of the day · middle: refresh*.
+toggles panel. Tooltip: *Scriptural — verse of the day · middle: refresh*.
 Middle click refreshes. Right-click: none (host default).
 
 ## Panel
@@ -49,7 +49,7 @@ Middle click refreshes. Right-click: none (host default).
 - VOTD: `GET https://api.midvash.com/v1/votd?language=en&version=web`
 - Versions: `GET https://api.midvash.com/v1/versions?language=en`
 - Default: `web` (World English Bible, public domain / CC0)
-- UA: `DailyBread/<manifest version> (Omarchy unofficial; harris.daily-bread)`
+- UA: `Scriptural/<manifest version> (Omarchy unofficial; harris.scriptural)`
 - Day key: **UTC** calendar date
 
 ## Non-goals

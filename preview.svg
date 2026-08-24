@@ -48,5 +48,5 @@
   <rect x="528" y="372" width="48" height="28" rx="8" fill="rgba(240,240,250,0.06)" stroke="rgba(240,240,250,0.12)"/>
   <text x="540" y="390" fill="#f0f0fa" font-family="system-ui,sans-serif" font-size="11">NIV</text>
   <text x="360" y="430" fill="rgba(240,240,250,0.22)" font-family="system-ui,sans-serif" font-size="10">Midvash · unofficial · public API</text>
-  <text x="360" y="448" fill="rgba(240,240,250,0.18)" font-family="system-ui,sans-serif" font-size="9">WEB public domain · ESV/NIV/… personal display via API · 0.1.4</text>
+  <text x="360" y="448" fill="rgba(240,240,250,0.18)" font-family="system-ui,sans-serif" font-size="9">WEB public domain · ESV/NIV/… personal display via API · 0.1.5</text>
 </svg>

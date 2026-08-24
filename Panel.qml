@@ -3,11 +3,11 @@ import Quickshell
 import qs.Commons
 import qs.Ui
 
-// Nested details panel for Daily Bread (loaded by BarWidget — not a separate kind).
-// 0.1.4 — verse of the day · pause. Midvash public VOTD.
+// Nested details panel for Scriptural (loaded by BarWidget — not a separate kind).
+// 0.1.5 — verse of the day · pause. Midvash public VOTD.
 Panel {
   id: root
-  moduleName: "harris.daily-bread"
+  moduleName: "harris.scriptural"
   manageIpc: false
 
   property var anchorItem: null

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "id": "harris.daily-bread",
-  "name": "Daily Bread",
-  "version": "0.1.4",
+  "id": "harris.scriptural",
+  "name": "Scriptural",
+  "version": "0.1.5",
   "author": "Harris Kenny",
   "license": "MIT",
   "description": "Give us this day the verse. Pause. Unofficial Midvash Bible verse of the day; not affiliated.",
@@ -13,7 +13,7 @@
     "barWidget": "BarWidget.qml"
   },
   "keywords": [
-    "daily bread",
+    "scriptural",
     "bible",
     "bible verse",
     "verse of the day",
@@ -35,10 +35,11 @@
     "lord's prayer",
     "christian",
     "faith",
-    "verse"
+    "verse",
+    "daily bread"
   ],
   "barWidget": {
-    "displayName": "Daily Bread",
+    "displayName": "Scriptural",
     "description": "Verse of the day. A quiet pause. Midvash public VOTD. Unofficial; not affiliated with Midvash or any Bible publisher.",
     "category": "Info",
     "allowMultiple": false,
@@ -66,7 +67,7 @@
       }
     ],
     "aliases": [
-      "daily bread",
+      "scriptural",
       "bible",
       "bible verse",
       "verse of the day",
@@ -81,7 +82,8 @@
       "devotion",
       "quiet time",
       "christian",
-      "faith"
+      "faith",
+      "daily bread"
     ]
   }
 }

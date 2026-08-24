@@ -3,11 +3,11 @@ import Quickshell
 import qs.Commons
 import qs.Ui
 
-// Daily Bread bar entry — Yellow Pixels / Fair Witness pattern:
+// Scriptural bar entry — Enricherino / Encyclopedic pattern:
 // BarWidget loads nested Panel.qml via Loader. kinds: ["bar-widget"] only.
 BarWidget {
   id: root
-  moduleName: "harris.daily-bread"
+  moduleName: "harris.scriptural"
 
   readonly property bool opened: panelLoader.item
     ? panelLoader.item.opened === true
@@ -96,7 +96,7 @@ BarWidget {
   onVersionChanged: syncStoreSettings()
   onLanguageChanged: syncStoreSettings()
 
-  DailyBreadStore {
+  ScripturalStore {
     id: dailyBreadStore
     onVersionChosen: function(slug) {
       root.mirrorVersion(slug)
@@ -125,11 +125,11 @@ BarWidget {
     text: dailyBreadStore.barLabel || "● Bread"
     horizontalMargin: 8.5
     tooltipText: {
-      var tip = "Daily Bread — verse of the day · middle: refresh"
+      var tip = "Scriptural — verse of the day · middle: refresh"
       if (dailyBreadStore.loading)
-        tip = "Daily Bread — refreshing… · middle: refresh"
+        tip = "Scriptural — refreshing… · middle: refresh"
       else if (dailyBreadStore.reference) {
-        tip = "Daily Bread — " + dailyBreadStore.reference
+        tip = "Scriptural — " + dailyBreadStore.reference
         if (dailyBreadStore.showingCached)
           tip += " (cached)"
         tip += " · middle: refresh"

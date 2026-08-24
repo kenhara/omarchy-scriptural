@@ -1,6 +1,6 @@
-# Daily Bread — pre-ship checklist (0.1.4)
+# Scriptural — pre-ship checklist (0.1.5)
 
-## PRE-SHIP note — audit 0.1.4
+## PRE-SHIP note — audit 0.1.5
 
 P2–P4 audit fixes (see `AUDIT.md` / `AUDIT-NOTES.md`): honest discoverability
 (`Info` category; keywords/aliases = marketplace/docs only — **shell ignores**
@@ -11,11 +11,11 @@ errors; shortReference map; chip highlight follows `verseVersion`.
 ## PRE-SHIP note — discoverability (0.1.3)
 
 Patch bump for marketplace discoverability before UTM smoke: `barWidget.category`
-Lifestyle → Widgets (0.1.3); 0.1.4 moves Widgets → **Info**. Expanded `keywords`
+Lifestyle → Widgets (0.1.3); 0.1.5 moves Widgets → **Info**. Expanded `keywords`
 + `barWidget.aliases` kept for filing drafts only.
 
-Omarchy Quattro pre-ship pass for `harris.daily-bread`. Builds on
-`PRE-AUDIT.md` (0.1.1) plus Fair Witness marketplace lessons.
+Omarchy Quattro pre-ship pass for `harris.scriptural`. Builds on
+`PRE-AUDIT.md` (0.1.1) plus Encyclopedic marketplace lessons.
 
 ## Checklist
 
@@ -32,7 +32,7 @@ Omarchy Quattro pre-ship pass for `harris.daily-bread`. Builds on
 | honest toasts | OK | Copied / Opened / Failed only on real outcome; English errors |
 | PlainText on verse text from API | OK | Verse + reference + version chip |
 | https allow-list for Open | OK | `sanitizeOpenUrl` + votd.py `sanitize_https_url` |
-| version sync | OK | **0.1.4** across manifest / README / DESIGN / preview / UA |
+| version sync | OK | **0.1.5** across manifest / README / DESIGN / preview / UA |
 | enum schema | OK | `version` enum (seven); language in defaults/code only |
 | no summon fakes | OK | Dropped `handleSummonPayload` / payload `open()` |
 | hover | OK | `containsMouse` + `hoverEnabled` on actionable |

@@ -1,22 +1,22 @@
-# Audit — `harris.daily-bread` (Omarchy plugin) v0.1.3
+# Audit — `harris.scriptural` (Omarchy plugin) v0.1.3
 
 ## Context
 
-Daily Bread is an Omarchy Quickshell `bar-widget` (`BarWidget.qml` → `Panel.qml` +
-`DailyBreadStore.qml`) that shells out to `scripts/votd.py` for Midvash public
+Scriptural is an Omarchy Quickshell `bar-widget` (`BarWidget.qml` → `Panel.qml` +
+`ScripturalStore.qml`) that shells out to `scripts/votd.py` for Midvash public
 VOTD. Target audited: **v0.1.3 @ 7a4f382**. Findings below are the user audit
-applied as **0.1.4** (see `AUDIT-NOTES.md`).
+applied as **0.1.5** (see `AUDIT-NOTES.md`).
 
 ## Severity summary
 
 | ID | Severity | Area | One-line |
 |----|----------|------|----------|
 | DB-01 | **P2** | manifest / README / PRE-SHIP | Discoverability overstated: `keywords` / `barWidget.aliases` are marketplace/docs, not the bar-widget loader; category should be canonical `Info` |
-| DB-02 | **P2** | DailyBreadStore | Cache dir may be missing; `persistToDisk` empty catch + `printErrors: false` → silent forever |
+| DB-02 | **P2** | ScripturalStore | Cache dir may be missing; `persistToDisk` empty catch + `printErrors: false` → silent forever |
 | DB-03 | **P2** | BarWidget / Store / schema | Chip `setVersion()` does not write widget settings; NKJV/NLT/MSG only via shaky settings enum; single-option `language` enum noise |
 | DB-04 | **P3** | README / preview | Stray **0.1.2** in layout / preview banner (non-changelog) |
 | DB-05 | **P3** | votd.py / UI | Portuguese Midvash errors (`Versão não encontrada`) surface raw to users |
-| DB-06 | **P3** | DailyBreadStore | `shortReference` weak on multi-word books (Song of Solomon) and numbered epistles |
+| DB-06 | **P3** | ScripturalStore | `shortReference` weak on multi-word books (Song of Solomon) and numbered epistles |
 | DB-07 | **P3** | Panel / Store | Failed version switch leaves chip highlight on requested version, not displayed `verseVersion` |
 | DB-08 | **P4** | BarWidget / votd.py | Unused `foreground`/`fontFamily` on bar; dead/no-op rate-limit; dual defaults sources |
 
@@ -38,15 +38,15 @@ applied as **0.1.4** (see `AUDIT-NOTES.md`).
 
 ### DB-02 · Cache dir silent failure
 
-**Files:** `DailyBreadStore.qml` (`persistToDisk`, `FileView`)
+**Files:** `ScripturalStore.qml` (`persistToDisk`, `FileView`)
 
-- Ensure `~/.cache/daily-bread/` exists before write (`mkdir -p` from QML).
+- Ensure `~/.cache/scriptural/` exists before write (`mkdir -p` from QML).
 - Stop empty `catch` on persist — at least `console.log` / `lastError` on failure.
 - May keep `printErrors: false` for quiet UI, but must not have zero feedback.
 
 ### DB-03 · Version persistence + schema reachability
 
-**Files:** `BarWidget.qml`, `DailyBreadStore.qml`, `Panel.qml`, `manifest.json`
+**Files:** `BarWidget.qml`, `ScripturalStore.qml`, `Panel.qml`, `manifest.json`
 
 - Chip `setVersion()` must mirror into widget settings when possible so choice
   survives reload.

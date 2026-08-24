@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Daily Bread — Midvash verse of the day (no auth).
+"""Scriptural — Midvash verse of the day (no auth).
 
 CLI for Omarchy / omarchy-shell bar-widget.
-User-Agent version is read from manifest.json (fallback 0.1.4).
+User-Agent version is read from manifest.json (fallback 0.1.5).
 
 Unofficial. Not affiliated with Midvash or any Bible publisher.
 Copyrighted translations (ESV/NIV/…) are for personal display via public API.
@@ -23,7 +23,7 @@ from typing import Any
 
 VOTD_URL = "https://api.midvash.com/v1/votd"
 VERSIONS_URL = "https://api.midvash.com/v1/versions"
-PLUGIN_ID = "harris.daily-bread"
+PLUGIN_ID = "harris.scriptural"
 
 # Midvash sometimes returns Portuguese error strings — map to English for UI.
 _PT_ERROR_MAP = [
@@ -43,11 +43,11 @@ def read_manifest_version() -> str:
             return ver
     except Exception:
         pass
-    return "0.1.4"
+    return "0.1.5"
 
 
 VERSION = read_manifest_version()
-USER_AGENT = f"DailyBread/{VERSION} (Omarchy unofficial; {PLUGIN_ID})"
+USER_AGENT = f"Scriptural/{VERSION} (Omarchy unofficial; {PLUGIN_ID})"
 
 COMMON_VERSIONS = ("web", "kjv", "esv", "niv", "nkjv", "nlt", "msg")
 
@@ -59,7 +59,7 @@ def emit(obj: dict[str, Any], exit_code: int = 0) -> None:
 
 
 def today_iso() -> str:
-    """UTC calendar day — Midvash VOTD key; matches DailyBreadStore.todayIso()."""
+    """UTC calendar day — Midvash VOTD key; matches ScripturalStore.todayIso()."""
     return datetime.now(timezone.utc).date().isoformat()
 
 
@@ -240,7 +240,7 @@ def list_versions(language: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Daily Bread — Midvash verse of the day (unofficial, no auth)"
+        description="Scriptural — Midvash verse of the day (unofficial, no auth)"
     )
     parser.add_argument(
         "--version",

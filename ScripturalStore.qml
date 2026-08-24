@@ -2,9 +2,9 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Daily Bread — runs scripts/votd.py via Process; parses JSON stdout.
+// Scriptural — runs scripts/votd.py via Process; parses JSON stdout.
 // Midvash public VOTD only. No API keys.
-// Caches daily verse to ~/.cache/daily-bread/votd.json keyed by UTC date+version.
+// Caches daily verse to ~/.cache/scriptural/votd.json keyed by UTC date+version.
 QtObject {
   id: store
 
@@ -104,7 +104,7 @@ QtObject {
     "numbers": "Num",
   })
 
-  readonly property string cacheDir: Quickshell.env("HOME") + "/.cache/daily-bread"
+  readonly property string cacheDir: Quickshell.env("HOME") + "/.cache/scriptural"
   readonly property string cachePath: cacheDir + "/votd.json"
   // Percent-decode so paths with spaces work for python3
   readonly property string pluginDir: {
@@ -258,7 +258,7 @@ QtObject {
     copyProc.command = [
       "bash", "-c",
       't="$1"; if command -v wl-copy >/dev/null 2>&1; then printf "%s" "$t" | wl-copy; elif command -v xclip >/dev/null 2>&1; then printf "%s" "$t" | xclip -selection clipboard; elif command -v xsel >/dev/null 2>&1; then printf "%s" "$t" | xsel --clipboard --input; else exit 127; fi',
-      "daily-bread-copy", t
+      "scriptural-copy", t
     ]
     copyProc.running = true
     return true
@@ -341,13 +341,13 @@ QtObject {
   }
 
   function persistToDisk(obj) {
-    // Ensure ~/.cache/daily-bread exists, then FileView.setText (mkpath belt+suspenders).
+    // Ensure ~/.cache/scriptural exists, then FileView.setText (mkpath belt+suspenders).
     store.ensureCacheDir()
     var body = JSON.stringify(obj || store.buildCacheObject(), null, 2) + "\n"
     try {
       cacheFile.setText(body)
     } catch (e) {
-      console.log("Daily Bread: cache write failed:", e)
+      console.log("Scriptural: cache write failed:", e)
       store.lastError = "cache write failed"
     }
   }
@@ -523,7 +523,7 @@ QtObject {
     printErrors: false
     onLoaded: store.onCacheLoaded(text())
     onLoadFailed: {
-      console.log("Daily Bread: cache load failed — fetching network")
+      console.log("Scriptural: cache load failed — fetching network")
       store.refresh(false)
     }
   }

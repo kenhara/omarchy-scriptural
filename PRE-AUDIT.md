@@ -1,7 +1,7 @@
-# Daily Bread — pre-audit harden (0.1.1)
+# Scriptural — pre-audit harden (0.1.1)
 
-Proactive locks applied from sibling audits **before** a Daily Bread audit pass.
-Sources: Space Jockey 1.5, Security Theater 0.5.1, Yellow Pixels 0.2.1, Fair Witness.
+Proactive locks applied from sibling audits **before** a Scriptural audit pass.
+Sources: Rocketlauncher 1.5, Compliantish 0.5.1, Enricherino 0.2.1, Encyclopedic.
 
 ## Locked in
 
@@ -29,7 +29,7 @@ Sources: Space Jockey 1.5, Security Theater 0.5.1, Yellow Pixels 0.2.1, Fair Wit
 | Honest network/deps + Midvash attribution + translation © note | playbook | README Network & deps |
 | Default WEB (public domain); copyrighted versions show attribution | VOTD | Footer + disclaimer |
 | Same **UTC** day verse; document timezone | VOTD | Store `todayIso`, `votd.py`, README |
-| UA `DailyBread/0.1.1` | VOTD | `scripts/votd.py` |
+| UA `Scriptural/0.1.1` | VOTD | `scripts/votd.py` |
 
 ## Pre-ship grep (expect empty)
 

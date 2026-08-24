@@ -1,6 +1,6 @@
-# Daily Bread
+# Scriptural
 
-![Daily Bread](preview.png)
+![Scriptural](preview.png)
 
 Give us this day the verse. Pause. Unofficial.
 
@@ -8,12 +8,12 @@ Daily scripture for Omarchy — bar **lingers** on today’s short reference
 (`Jer 33:3`), panel shows the verse. Named for the familiar prayer line.
 Powered by the **Midvash** public VOTD API. No API keys. No publisher chrome.
 
-**ID:** `harris.daily-bread`  
+**ID:** `harris.scriptural`  
 **Author:** Harris Kenny  
 **License:** MIT  
-**Version:** 0.1.4
+**Version:** 0.1.5
 
-### 0.1.4
+### 0.1.5
 - Audit fixes: honest discoverability (`Info` category); cache mkdir + persist
   logging; chip version write-back; all seven versions on chips; English API
   errors; shortReference abbrevs; chip highlight follows displayed verse.
@@ -27,11 +27,11 @@ Powered by the **Midvash** public VOTD API. No API keys. No publisher chrome.
   witty pitch + bar linger of short ref, Controls L/M honesty, version sync.
 
 ### 0.1.1
-- Pre-audit harden from sibling audits (Space Jockey / Security Theater /
-  Yellow Pixels / Fair Witness): named `Style.font.*` tokens, clipboardText +
+- Pre-audit harden from sibling audits (Rocketlauncher / Compliantish /
+  Enricherino / Encyclopedic): named `Style.font.*` tokens, clipboardText +
   honest copy toasts, FileView cache (no mkdir race), dead `dataChanged`
   removed, hover on actions, UTC VOTD day, `cached` honesty, popout-switch,
-  UA `DailyBread/0.1.1`, README hero preview, LICENSE/docs scrub.
+  UA `Scriptural/0.1.1`, README hero preview, LICENSE/docs scrub.
 
 ### 0.1.0
 - MVP — bar short ref (`Jer 33:3`) or `● Bread`, panel verse + chips,
@@ -40,13 +40,13 @@ Powered by the **Midvash** public VOTD API. No API keys. No publisher chrome.
 
 ## Repository
 
-**GitHub:** https://github.com/kenhara/omarchy-daily-bread  
-Local folder: **`omarchy-daily-bread`**.
+**GitHub:** https://github.com/kenhara/omarchy-scriptural  
+Local folder: **`omarchy-scriptural`**.
 
 ## Unofficial disclaimer
 
-**Daily Bread is unofficial.** It is **not** affiliated with, endorsed by, or
-sponsored by Midvash, any Bible publisher, or any related entity. “Daily Bread”
+**Scriptural is unofficial.** It is **not** affiliated with, endorsed by, or
+sponsored by Midvash, any Bible publisher, or any related entity. “Scriptural”
 is a familiar prayer / scripture phrase. This plugin is a thin personal
 client that calls a **public read** HTTP verse-of-the-day API.
 
@@ -66,15 +66,15 @@ Top-level `keywords` and `barWidget.aliases` in `manifest.json` are for
 **marketplace filing drafts and human search docs** (Bible, VOTD, KJV, NIV,
 ESV, Midvash, devotion, etc.). The Omarchy **bar-widget loader ignores them**
 when resolving bar widgets — they do not make the widget appear in bar search.
-Display name stays **Daily Bread** (prayer allusion; no publisher as title).
+Display name stays **Scriptural** (prayer allusion; no publisher as title).
 
 ## Install
 
 ### From GitHub
 
 ```sh
-omarchy plugin add https://github.com/kenhara/omarchy-daily-bread.git --enable
-omarchy bar move harris.daily-bread --section right
+omarchy plugin add https://github.com/kenhara/omarchy-scriptural.git --enable
+omarchy bar move harris.scriptural --section right
 ```
 
 ### Local copy (this tree)
@@ -84,12 +84,12 @@ machine:
 
 ```sh
 mkdir -p ~/.config/omarchy/plugins
-cp -a . ~/.config/omarchy/plugins/harris.daily-bread
+cp -a . ~/.config/omarchy/plugins/harris.scriptural
 
-omarchy plugin validate ~/.config/omarchy/plugins/harris.daily-bread
+omarchy plugin validate ~/.config/omarchy/plugins/harris.scriptural
 omarchy-shell shell rescanPlugins
 
-omarchy bar move harris.daily-bread --section right
+omarchy bar move harris.scriptural --section right
 ```
 
 Hot reload applies on save under `~/.config/omarchy/plugins/`.
@@ -98,13 +98,13 @@ Hot reload applies on save under `~/.config/omarchy/plugins/`.
 
 ```sh
 mkdir -p ~/.config/omarchy/plugins
-ln -sfn /path/to/omarchy-daily-bread ~/.config/omarchy/plugins/harris.daily-bread
+ln -sfn /path/to/omarchy-scriptural ~/.config/omarchy/plugins/harris.scriptural
 omarchy-shell shell rescanPlugins
 ```
 
 ## Configure
 
-Open **widget settings** for Daily Bread (optional):
+Open **widget settings** for Scriptural (optional):
 
 | Schema key | Label | Default |
 |------------|-------|---------|
@@ -148,13 +148,13 @@ with a **cached** chip — never presented as a fresh network fetch.
 ## Remove
 
 ```sh
-omarchy plugin remove harris.daily-bread
+omarchy plugin remove harris.scriptural
 ```
 
 Optional cache cleanup:
 
 ```sh
-rm -rf ~/.cache/daily-bread
+rm -rf ~/.cache/scriptural
 ```
 
 ## Network & deps
@@ -169,11 +169,11 @@ rm -rf ~/.cache/daily-bread
 Outbound HTTPS on bootstrap (if cache miss), version change, or middle-click
 refresh. No auth. No signup.
 
-User-Agent: `DailyBread/<manifest version> (Omarchy unofficial; harris.daily-bread)`
+User-Agent: `Scriptural/<manifest version> (Omarchy unofficial; harris.scriptural)`
 (version read from `manifest.json`).
 
 **Timezone:** the VOTD “day” key is **UTC** (same verse worldwide for a given
-UTC calendar date). Cache file: `~/.cache/daily-bread/votd.json` keyed by
+UTC calendar date). Cache file: `~/.cache/scriptural/votd.json` keyed by
 **UTC date + version**.
 
 English version slugs known live (2026-08-23): `web`, `kjv`, `esv`, `niv`,
@@ -201,10 +201,10 @@ string.
 ## Layout
 
 ```
-manifest.json          # harris.daily-bread @ 0.1.4
+manifest.json          # harris.scriptural @ 0.1.5
 BarWidget.qml          # bar entry + Loader → Panel; middle-click refresh
 Panel.qml              # verse + chips + actions (Flickable)
-DailyBreadStore.qml    # cache, Process → votd.py
+ScripturalStore.qml    # cache, Process → votd.py
 qmldir
 scripts/votd.py
 docs/preview/index.html
@@ -227,11 +227,11 @@ README.md
 - Outbound HTTPS on cache miss, version change, or explicit middle-click
   refresh. No paid calls.
 - MIT at repo root. Unofficial — not affiliated with Midvash or Bible
-  publishers. Daily Bread is scripture, not a publisher product.
+  publishers. Scriptural is scripture, not a publisher product.
 
 ## Preview
 
-Open `docs/preview/index.html` in a browser for a filled HTML mock (v0.1.4)
+Open `docs/preview/index.html` in a browser for a filled HTML mock (v0.1.5)
 with today’s sample (Jeremiah 33:3 WEB). Marketplace card: `preview.png`
 (also embedded above).
 
