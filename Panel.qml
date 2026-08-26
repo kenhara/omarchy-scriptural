@@ -120,6 +120,7 @@ Panel {
             width: parent.width
             visible: liveStore && liveStore.lastError && liveStore.lastError.length
             text: liveStore ? liveStore.lastError : ""
+            textFormat: Text.PlainText
             color: Color.urgent
             font.family: root.contentFontFamily
             font.pixelSize: Style.font.bodySmall
@@ -130,6 +131,7 @@ Panel {
             width: parent.width
             visible: liveStore && liveStore.toastText && liveStore.toastText.length
             text: liveStore ? liveStore.toastText : ""
+            textFormat: Text.PlainText
             color: root.scripturalAccent
             font.family: root.contentFontFamily
             font.pixelSize: Style.font.bodySmall

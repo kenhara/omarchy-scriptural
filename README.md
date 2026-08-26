@@ -11,7 +11,16 @@ Powered by the **Midvash** public VOTD API. No API keys. No publisher chrome.
 **ID:** `kenhara.scriptural`  
 **Author:** Harris Kenny  
 **License:** MIT  
-**Version:** 0.1.19
+**Version:** 0.1.20
+
+### 0.1.20
+- Open URL: parse `https`, allowlist `midvash.com` / `www.midvash.com`, length-cap; `xdg-open --` URL.
+- Refuse HTTP redirects whose host is not `api.midvash.com` (https) before following.
+- Cache write: exclusive temp (`O_WRONLY|O_CREAT|O_EXCL|O_NOFOLLOW` 0600) + fsync + `replace`; dir 0700. HC-05 reads unchanged.
+- `Text.PlainText` on lastError, toast, and remaining remote-derived Text (verse/ref already PlainText).
+- Copy kept: prefer `Quickshell.clipboardText`; fallback feeds copier on stdin so the verse is not in argv.
+- Re-apply `MAX_TEXT_CHARS` / `MAX_REF_CHARS` / `MAX_URL_CHARS` in `applyPayload` (including disk).
+- Pin `PATH=/usr/bin:/bin` on Processes; `python3 -B` stays.
 
 ### 0.1.19
 - Harden cache read: reject symlink/FIFO trust path (HC-05). Reads go through `votd.py --load-cache` (`O_NOFOLLOW|O_NONBLOCK`, regular file only).
@@ -179,7 +188,7 @@ with a **cached** chip — never presented as a fresh network fetch.
 | Right-click bar | None (host default) |
 | Copy verse | Clipboard: `"text" — Reference (VER)` |
 | Copy reference | Clipboard: reference only |
-| Open | Midvash verse URL (`https:` only) |
+| Open | Midvash verse URL (`https://midvash.com` / `www.midvash.com` only) |
 | Translation chips | Switch version + refetch / cache |
 
 ## Remove
@@ -261,6 +270,10 @@ README.md
 
 - **No API keys.** Public read VOTD only.
 - Cache stores the last successful verse for date+version — no credentials.
+  Writes use an exclusive temp (`O_EXCL|O_NOFOLLOW` 0600, fsync, replace);
+  reads stay HC-05 (`O_NOFOLLOW|O_NONBLOCK`, regular file only).
+- Open is `https` to `midvash.com` / `www.midvash.com` only. Helper HTTP
+  refuses redirects off `api.midvash.com` before following.
 - Outbound HTTPS on cache miss, version change, or explicit middle-click
   refresh. No paid calls.
 - MIT at repo root. Unofficial — not affiliated with Midvash or Bible

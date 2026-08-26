@@ -114,7 +114,12 @@ Item {
   readonly property string cacheDir: Quickshell.env("HOME") + "/.cache/scriptural"
   readonly property string cachePath: cacheDir + "/votd.json"
   readonly property int maxCacheBytes: 262144
+  readonly property int maxTextChars: 8192
+  readonly property int maxRefChars: 512
+  readonly property int maxUrlChars: 2048
   property string cacheBuf: ""
+  property string _pendingCacheJson: ""
+  property string _pendingCopy: ""
   // Percent-decode so paths with spaces work for python3
   readonly property string pluginDir: {
     var raw = String(Qt.resolvedUrl("."))
@@ -264,12 +269,14 @@ Item {
       }
     } catch (e) {}
     // Shell fallback: exactly one of wl-copy / xclip / xsel; bash -c (not -lc).
-    // Toast only on copyProc success (onExited) — never claim Copied early.
+    // Verse on stdin — not argv. Toast only on copyProc success (onExited).
+    store._pendingCopy = t
     copyProc.command = [
       "bash", "-c",
-      't="$1"; if command -v wl-copy >/dev/null 2>&1; then printf "%s" "$t" | wl-copy; elif command -v xclip >/dev/null 2>&1; then printf "%s" "$t" | xclip -selection clipboard; elif command -v xsel >/dev/null 2>&1; then printf "%s" "$t" | xsel --clipboard --input; else exit 127; fi',
-      "scriptural-copy", t
+      'if command -v wl-copy >/dev/null 2>&1; then wl-copy; elif command -v xclip >/dev/null 2>&1; then xclip -selection clipboard; elif command -v xsel >/dev/null 2>&1; then xsel --clipboard --input; else exit 127; fi'
     ]
+    copyProc.environment = ({ "PATH": "/usr/bin:/bin" })
+    copyProc.stdinEnabled = true
     copyProc.running = true
     return true
   }
@@ -289,18 +296,38 @@ Item {
 
   function sanitizeOpenUrl(url) {
     var u = String(url || "").trim()
-    if (!u.length)
+    if (!u.length || u.length > store.maxUrlChars)
       return ""
-    // https only — refuse file:/mailto:/custom schemes from remote payload
-    if (u.toLowerCase().indexOf("https://") === 0)
-      return u
-    return ""
+    // Parse https; allowlist midvash.com / www.midvash.com; refuse credentials,
+    // backslash, whitespace, non-443 ports, and any other host.
+    if (u.toLowerCase().indexOf("https://") !== 0)
+      return ""
+    if (u.indexOf("\\") >= 0 || /\s/.test(u) || u.indexOf("@") >= 0)
+      return ""
+    var rest = u.slice(8)
+    var cut = rest.search(/[\/?#]/)
+    var hostPart = cut >= 0 ? rest.slice(0, cut) : rest
+    if (!hostPart.length || hostPart.indexOf("[") >= 0)
+      return ""
+    var host = hostPart
+    var port = ""
+    var colon = hostPart.lastIndexOf(":")
+    if (colon >= 0) {
+      port = hostPart.slice(colon + 1)
+      host = hostPart.slice(0, colon)
+      if (port !== "443")
+        return ""
+    }
+    host = host.toLowerCase()
+    if (host !== "midvash.com" && host !== "www.midvash.com")
+      return ""
+    return u
   }
 
   function openUrlExternal(url) {
     var u = store.sanitizeOpenUrl(url)
     if (!u.length) {
-      store.showToast(String(url || "").trim().length ? "Refused — https only" : "No URL")
+      store.showToast(String(url || "").trim().length ? "Refused — Midvash https only" : "No URL")
       return false
     }
     try {
@@ -310,7 +337,8 @@ Item {
         return true
       }
     } catch (e) {}
-    openUrlProc.command = ["xdg-open", u]
+    openUrlProc.command = ["xdg-open", "--", u]
+    openUrlProc.environment = ({ "PATH": "/usr/bin:/bin" })
     openUrlProc.running = true
     return true
   }
@@ -346,20 +374,42 @@ Item {
   }
 
   function ensureCacheDir() {
-    mkdirProc.command = ["mkdir", "-p", "--", store.cacheDir]
+    mkdirProc.command = ["mkdir", "-p", "-m", "0700", "--", store.cacheDir]
+    mkdirProc.environment = ({ "PATH": "/usr/bin:/bin" })
     mkdirProc.running = true
   }
 
+  function persistCacheBody(body) {
+    store._pendingCacheJson = String(body || "")
+    if (cacheWriteProc.running)
+      return
+    cacheWriteProc.command = ["python3", "-B", store.votdPath, "--save-cache", store.cachePath]
+    cacheWriteProc.environment = ({
+      "PYTHONDONTWRITEBYTECODE": "1",
+      "PATH": "/usr/bin:/bin"
+    })
+    cacheWriteProc.stdinEnabled = true
+    cacheWriteProc.running = true
+  }
+
+  function onCacheWriteRunningChanged() {
+    if (!cacheWriteProc.running) return
+    var blob = store._pendingCacheJson || ""
+    if (!blob.length) {
+      cacheWriteProc.stdinEnabled = false
+      return
+    }
+    try {
+      cacheWriteProc.write(blob)
+    } catch (e) {}
+    cacheWriteProc.stdinEnabled = false
+    store._pendingCacheJson = ""
+  }
+
   function persistToDisk(obj) {
-    // Ensure ~/.cache/scriptural exists, then FileView.setText (mkpath belt+suspenders).
     store.ensureCacheDir()
     var body = JSON.stringify(obj || store.buildCacheObject(), null, 2) + "\n"
-    try {
-      cacheFile.setText(body)
-    } catch (e) {
-      console.log("Scriptural: cache write failed:", e)
-      store.lastError = "cache write failed"
-    }
+    store.persistCacheBody(body)
   }
 
   function applyPayload(obj, source) {
@@ -371,8 +421,8 @@ Item {
       store.dataSource = source || store.dataSource
       return false
     }
-    store.reference = String(payload.reference || "")
-    store.text = String(payload.text || "")
+    store.reference = String(payload.reference || "").substring(0, store.maxRefChars)
+    store.text = String(payload.text || "").substring(0, store.maxTextChars)
     store.url = store.sanitizeOpenUrl(payload.url || "")
     store.verseVersion = String(payload.version || store.version || "web").toLowerCase()
     store.verseDate = String(payload.date || obj.date || store.todayIso())
@@ -428,7 +478,8 @@ Item {
       "--language", store.normalizeLanguage(store.language)
     ]
     votdProc.environment = ({
-      "PYTHONDONTWRITEBYTECODE": "1"
+      "PYTHONDONTWRITEBYTECODE": "1",
+      "PATH": "/usr/bin:/bin"
     })
     votdProc.running = true
   }
@@ -582,25 +633,33 @@ Item {
     onTriggered: store.toastText = ""
   }
 
-  FileView {
-    id: cacheFile
-    path: store.cachePath
-    watchChanges: false
-    // Quiet UI: Framework errors off; persistToDisk logs failures itself.
-    // FileView writes only; reads via votd.py --load-cache (O_NOFOLLOW|O_NONBLOCK).
-    printErrors: false
-  }
-
   Process {
     id: mkdirProc
     running: false
+    environment: ({ "PATH": "/usr/bin:/bin" })
+  }
+
+  Process {
+    id: cacheWriteProc
+    running: false
+    stdinEnabled: true
+    environment: ({ "PYTHONDONTWRITEBYTECODE": "1", "PATH": "/usr/bin:/bin" })
+    onRunningChanged: store.onCacheWriteRunningChanged()
+    onExited: function(exitCode, exitStatus) {
+      if (exitCode !== 0) {
+        console.log("Scriptural: cache write failed:", exitCode)
+        store.lastError = "cache write failed"
+      }
+      if (store._pendingCacheJson && store._pendingCacheJson.length)
+        store.persistCacheBody(store._pendingCacheJson)
+    }
   }
 
   Process {
     id: cacheReadProc
     running: false
     command: ["python3", "-B", store.votdPath, "--load-cache", store.cachePath]
-    environment: ({ "PYTHONDONTWRITEBYTECODE": "1" })
+    environment: ({ "PYTHONDONTWRITEBYTECODE": "1", "PATH": "/usr/bin:/bin" })
     stdout: SplitParser {
       onRead: function(line) {
         if (store.cacheBuf.length <= store.maxCacheBytes)
@@ -615,6 +674,21 @@ Item {
   Process {
     id: copyProc
     running: false
+    stdinEnabled: true
+    environment: ({ "PATH": "/usr/bin:/bin" })
+    onRunningChanged: {
+      if (!copyProc.running) return
+      var blob = store._pendingCopy || ""
+      if (!blob.length) {
+        copyProc.stdinEnabled = false
+        return
+      }
+      try {
+        copyProc.write(blob)
+      } catch (e) {}
+      copyProc.stdinEnabled = false
+      store._pendingCopy = ""
+    }
     onExited: function(exitCode, exitStatus) {
       if (exitCode === 0)
         store.showToast("Copied")
@@ -628,6 +702,7 @@ Item {
   Process {
     id: openUrlProc
     running: false
+    environment: ({ "PATH": "/usr/bin:/bin" })
     onExited: function(exitCode, exitStatus) {
       if (exitCode === 0)
         store.showToast("Opened")
@@ -639,6 +714,7 @@ Item {
   Process {
     id: votdProc
     running: false
+    environment: ({ "PYTHONDONTWRITEBYTECODE": "1", "PATH": "/usr/bin:/bin" })
     stdout: SplitParser {
       onRead: function(line) {
         if (store._votdOverflow)
@@ -657,6 +733,8 @@ Item {
     stderr: SplitParser {
       onRead: function(line) {
         var s = String(line || "")
+        if (s.length > 2048)
+          s = s.substring(0, 2048)
         if (s.length)
           store.lastError = s
       }

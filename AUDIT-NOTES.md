@@ -25,3 +25,16 @@ Fixes from [AUDIT.md](AUDIT.md) against v0.1.3 @ `7a4f382`. No marketplace submi
 | ID | Finding | Fix |
 |----|---------|-----|
 | **HC-05** | `cacheReadProc` used `head -c` on `~/.cache/scriptural/votd.json` — follows a symlink and can block forever on a FIFO | `votd.py --load-cache` opens `O_RDONLY\|O_NOFOLLOW\|O_NONBLOCK`, requires `S_ISREG`, bounded read of `MAX_CACHE_BYTES` (256 KiB). Missing / symlink / FIFO / oversize / not-a-dict → **exit 1** (empty/tiny stdout). Valid dict → JSON on stdout, **exit 0**. Cache body is written directly (not via `emit()`, which caps at 64 KiB). FileView remains write-only. |
+
+## 0.1.20 — open / redirect / cache write / clipboard
+
+| ID | Finding | Fix |
+|----|---------|-----|
+| **Open** | `sanitizeOpenUrl` accepted any `https:` URL; `xdg-open` got the URL as a trailing argv without `--` | Parse `https`; allowlist `midvash.com` and `www.midvash.com`; length-cap `MAX_URL_CHARS`; `xdg-open --` URL. Same allowlist in `votd.py` `sanitize_https_url`. |
+| **Redirect** | `http_get_json` followed 30x via default urllib; post-fetch `geturl()` is too late | `ApiHostRedirectHandler.redirect_request` refuses hops whose host is not `api.midvash.com` (https, port default/443) *before* following. |
+| **Cache write** | `FileView.setText` can follow a dest symlink | `votd.py --save-cache`: dir 0700; unique temp `O_WRONLY\|O_CREAT\|O_EXCL\|O_NOFOLLOW` 0600; fsync; `os.replace`. Body on stdin. HC-05 `--load-cache` unchanged. |
+| **PlainText** | `lastError` / `toastText` (and other remote Text) defaulted to RichText | `Text.PlainText` on lastError, toast; verse/ref/versionChip already PlainText. |
+| **Copy** | Fallback put verse in argv (`$1`) | Keep Copy. Prefer `Quickshell.clipboardText`; else feed wl-copy/xclip/xsel on stdin. |
+| **Caps** | Disk `applyPayload` did not re-apply field caps | Re-apply `MAX_TEXT_CHARS` / `MAX_REF_CHARS` / `MAX_URL_CHARS` in `applyPayload` (network and disk). |
+| **PATH** | Process env did not pin PATH | `PATH=/usr/bin:/bin` on all Processes. `python3 -B` stays. |
+
