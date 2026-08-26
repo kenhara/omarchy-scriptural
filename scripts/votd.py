@@ -2,7 +2,7 @@
 """Scriptural — Midvash verse of the day (no auth).
 
 CLI for Omarchy / omarchy-shell bar-widget.
-User-Agent version is read from manifest.json (fallback 0.1.19).
+User-Agent version is read from manifest.json (fallback 0.1.20).
 
 Unofficial. Not affiliated with Midvash or any Bible publisher.
 Copyrighted translations (ESV/NIV/…) are for personal display via public API.
@@ -14,6 +14,7 @@ import argparse
 import json
 import os
 import re
+import secrets
 import stat
 import sys
 import urllib.error
@@ -35,6 +36,11 @@ MAX_TEXT_CHARS = 8192
 MAX_REF_CHARS = 512
 MAX_URL_CHARS = 2048
 
+API_HOST = "api.midvash.com"
+OPEN_URL_HOSTS = frozenset({"midvash.com", "www.midvash.com"})
+CACHE_FILE_MODE = 0o600
+CACHE_DIR_MODE = 0o700
+
 # Midvash sometimes returns Portuguese error strings — map to English for UI.
 _PT_ERROR_MAP = [
     (re.compile(r"vers[aã]o\s+n[aã]o\s+encontrada", re.I), "Version not found"),
@@ -53,7 +59,7 @@ def read_manifest_version() -> str:
             return ver
     except Exception:
         pass
-    return "0.1.19"
+    return "0.1.20"
 
 
 VERSION = read_manifest_version()
@@ -125,15 +131,88 @@ def english_error(detail: Any) -> str:
     return raw
 
 
+def _https_host(url: str) -> tuple[str, str, int | None] | None:
+    """Parse url; return (scheme, hostname, port) only for a clean https URL."""
+    u = str(url or "").strip()
+    if not u:
+        return None
+    try:
+        parsed = urllib.parse.urlparse(u)
+    except Exception:
+        return None
+    scheme = (parsed.scheme or "").lower()
+    if scheme != "https":
+        return None
+    host = (parsed.hostname or "").lower()
+    if not host:
+        return None
+    if parsed.username is not None or parsed.password is not None:
+        return None
+    return scheme, host, parsed.port
+
+
+def is_api_url(url: str) -> bool:
+    """True when url is https://api.midvash.com (port default/443)."""
+    parsed = _https_host(url)
+    if parsed is None:
+        return False
+    _scheme, host, port = parsed
+    if host != API_HOST:
+        return False
+    if port not in (None, 443):
+        return False
+    return True
+
+
+def sanitize_https_url(url: str) -> str:
+    """Allow https URLs whose host is midvash.com or www.midvash.com, length-capped."""
+    u = str(url or "").strip()
+    if not u or len(u) > MAX_URL_CHARS:
+        return ""
+    parsed = _https_host(u)
+    if parsed is None:
+        return ""
+    _scheme, host, port = parsed
+    if host not in OPEN_URL_HOSTS:
+        return ""
+    if port not in (None, 443):
+        return ""
+    return u
+
+
+class ApiHostRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Follow 30x only when the next hop is https://api.midvash.com.
+
+    Checked in redirect_request *before* a follow-up Request is issued.
+    Post-fetch geturl() is not the gate.
+    """
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):  # noqa: ANN001
+        if not is_api_url(newurl):
+            raise urllib.error.HTTPError(
+                newurl,
+                int(code),
+                "redirect host not allowed",
+                headers,
+                fp,
+            )
+        return urllib.request.HTTPRedirectHandler.redirect_request(
+            self, req, fp, code, msg, headers, newurl
+        )
+
+
 def http_get_json(url: str, timeout: float = 30.0) -> tuple[int, Any, str]:
     # One HTTP call per CLI process — no inter-call rate limit needed.
+    if not is_api_url(url):
+        return 0, {"error": "url host not allowed"}, ""
     headers = {
         "User-Agent": USER_AGENT,
         "Accept": "application/json",
     }
     req = urllib.request.Request(url, headers=headers, method="GET")
+    opener = urllib.request.build_opener(ApiHostRedirectHandler)
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
+        with opener.open(req, timeout=timeout) as resp:
             raw = read_capped(resp).decode("utf-8", errors="replace")
             code = getattr(resp, "status", 200) or 200
             try:
@@ -147,10 +226,15 @@ def http_get_json(url: str, timeout: float = 30.0) -> tuple[int, Any, str]:
             raw = read_capped(e).decode("utf-8", errors="replace") if e.fp else ""
         except ResponseTooLarge:
             return int(e.code), {"error": "response too large"}, ""
+        reason = str(e.reason or "")
         try:
-            parsed = json.loads(raw) if raw else {"error": str(e.reason)}
+            parsed = json.loads(raw) if raw else {"error": reason}
         except json.JSONDecodeError:
-            parsed = {"_raw": raw or str(e.reason)}
+            parsed = {"_raw": raw or reason}
+        if reason == "redirect host not allowed" and (
+            not isinstance(parsed, dict) or not parsed.get("error")
+        ):
+            parsed = {"error": reason}
         return int(e.code), parsed, raw
     except Exception as e:
         return 0, {"error": str(e)}, str(e)
@@ -166,21 +250,11 @@ def normalize_language(lang: str) -> str:
     return s or "en"
 
 
-def sanitize_https_url(url: str) -> str:
-    """Only allow https: URLs from remote payload."""
-    u = str(url or "").strip()
-    if u.lower().startswith("https://"):
-        return u
-    return ""
-
-
 def build_ok(payload: dict[str, Any], version: str, language: str) -> dict[str, Any]:
     ref = str(payload.get("reference") or "").strip()[:MAX_REF_CHARS]
     text = str(payload.get("text") or "").strip()[:MAX_TEXT_CHARS]
     ver = str(payload.get("version") or version).strip().lower() or version
     url = sanitize_https_url(payload.get("url") or "")
-    if len(url) > MAX_URL_CHARS:
-        url = ""
     return {
         "ok": True,
         "reference": ref,
@@ -289,6 +363,102 @@ def list_versions(language: str) -> None:
     )
 
 
+def ensure_dir_mode(path: str | os.PathLike[str], mode: int = CACHE_DIR_MODE) -> None:
+    p = Path(path)
+    p.mkdir(parents=True, exist_ok=True)
+    try:
+        os.chmod(os.fspath(p), mode)
+    except Exception:
+        pass
+
+
+def write_exclusive(
+    dest: str | os.PathLike[str],
+    data: bytes | str,
+    *,
+    mode: int = CACHE_FILE_MODE,
+) -> None:
+    """Write via O_WRONLY|O_CREAT|O_EXCL|O_NOFOLLOW temp, fsync, os.replace.
+
+    Dest itself is never opened for write (symlink is replaced, not followed;
+    a FIFO at dest is renamed over, not opened). Dir mkdir 0700.
+    """
+    dest_path = Path(dest)
+    dest_dir = dest_path.parent
+    ensure_dir_mode(dest_dir)
+    payload = data if isinstance(data, (bytes, bytearray)) else str(data).encode("utf-8")
+
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+    flags |= getattr(os, "O_NOFOLLOW", 0)
+    flags |= getattr(os, "O_NONBLOCK", 0)
+
+    tmp_path: Path | None = None
+    fd = -1
+    last_err: Exception | None = None
+    for _ in range(16):
+        candidate = dest_dir / f".{dest_path.name}.{secrets.token_hex(8)}.tmp"
+        try:
+            fd = os.open(os.fspath(candidate), flags, mode)
+            tmp_path = candidate
+            break
+        except FileExistsError as e:
+            last_err = e
+            continue
+        except OSError as e:
+            last_err = e
+            continue
+    if fd < 0 or tmp_path is None:
+        raise OSError(f"exclusive temp create failed: {last_err}")
+
+    try:
+        view = memoryview(payload)
+        while len(view):
+            n = os.write(fd, view)
+            if n <= 0:
+                raise OSError("short write")
+            view = view[n:]
+        os.fsync(fd)
+    except Exception:
+        try:
+            os.close(fd)
+        except Exception:
+            pass
+        fd = -1
+        try:
+            os.unlink(os.fspath(tmp_path))
+        except Exception:
+            pass
+        raise
+    os.close(fd)
+    os.replace(os.fspath(tmp_path), os.fspath(dest_path))
+    try:
+        os.chmod(os.fspath(dest_path), mode)
+    except Exception:
+        pass
+
+
+def save_cache(path: str) -> None:
+    """Bounded exclusive cache write. Body from stdin (never argv)."""
+    dest = str(path or "").strip()
+    if not dest:
+        raise SystemExit(1)
+    try:
+        raw = sys.stdin.buffer.read(MAX_CACHE_BYTES + 1)
+    except Exception:
+        raise SystemExit(1)
+    if len(raw) > MAX_CACHE_BYTES:
+        try:
+            sys.stderr.write("cache too large\n")
+            sys.stderr.flush()
+        except Exception:
+            pass
+        raise SystemExit(1)
+    try:
+        write_exclusive(dest, raw)
+    except Exception:
+        raise SystemExit(1)
+    raise SystemExit(0)
+
 
 def load_cache(path: str) -> None:
     """Bounded, trust-path cache read.
@@ -375,7 +545,16 @@ def main() -> None:
         metavar="PATH",
         help="Load a cache JSON file with O_NOFOLLOW|O_NONBLOCK (no network)",
     )
+    parser.add_argument(
+        "--save-cache",
+        default="",
+        metavar="PATH",
+        help="Write cache JSON from stdin via exclusive temp + fsync + replace",
+    )
     args = parser.parse_args()
+    save_path = str(args.save_cache or "").strip()
+    if save_path:
+        save_cache(save_path)
     cache_path = str(args.load_cache or "").strip()
     if cache_path:
         load_cache(cache_path)
