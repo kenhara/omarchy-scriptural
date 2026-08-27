@@ -33,6 +33,49 @@ Panel {
   readonly property color scripturalAccent: Qt.rgba(0.91, 0.72, 0.38, 1.0)
 
   readonly property var liveStore: store
+  // Flat keyboard cursor: actions first, then the seven translations.
+  property int keyboardIndex: 0
+  readonly property int actionCount: 3
+  readonly property int versionCount: liveStore && liveStore.quickVersions
+    ? liveStore.quickVersions.length : 7
+  readonly property int keyboardItemCount: actionCount + versionCount
+
+  function moveKeyboardCursor(dx, dy) {
+    if (keyboardItemCount <= 0) return
+    var next = keyboardIndex
+    if (dy > 0) {
+      next = next < actionCount
+        ? actionCount + Math.min(next, versionCount - 1)
+        : Math.min(keyboardItemCount - 1, next + 1)
+    } else if (dy < 0) {
+      next = next >= actionCount && next < actionCount * 2
+        ? Math.min(actionCount - 1, next - actionCount)
+        : Math.max(0, next - 1)
+    } else if (dx !== 0) {
+      next = (next + (dx > 0 ? 1 : -1) + keyboardItemCount) % keyboardItemCount
+    }
+    keyboardIndex = next
+  }
+
+  function activateKeyboardCursor() {
+    if (!liveStore) return
+    if (keyboardIndex === 0) liveStore.copyVerse()
+    else if (keyboardIndex === 1) liveStore.copyReference()
+    else if (keyboardIndex === 2) liveStore.openVerse()
+    else {
+      var item = liveStore.quickVersions[keyboardIndex - actionCount]
+      if (item) liveStore.setVersion(item.slug)
+    }
+  }
+
+  function handleTextKey(text) {
+    var key = String(text || "").toLowerCase()
+    if (!liveStore) return
+    if (key === "c") liveStore.copyVerse()
+    else if (key === "y") liveStore.copyReference()
+    else if (key === "o") liveStore.openVerse()
+    else if (key === "r") liveStore.refresh(true)
+  }
 
   function switchPanel(direction) {
     if (root.bar && typeof root.bar.switchPanelFrom === "function")
@@ -60,6 +103,9 @@ Panel {
 
       onCloseRequested: root.close()
       onTabRequested: function(direction) { root.switchPanel(direction) }
+      onMoveRequested: function(dx, dy) { root.moveKeyboardCursor(dx, dy) }
+      onActivateRequested: root.activateKeyboardCursor()
+      onTextKey: function(text) { root.handleTextKey(text) }
 
       Flickable {
         id: flick
@@ -250,16 +296,19 @@ Panel {
               glyph: "\uf0c5"
               label: "Copy"
               accent: true
+              keyboardSelected: root.keyboardIndex === 0
               onClicked: if (liveStore) liveStore.copyVerse()
             }
             ActionChip {
               glyph: "\uf02d"
               label: "Copy ref"
+              keyboardSelected: root.keyboardIndex === 1
               onClicked: if (liveStore) liveStore.copyReference()
             }
             ActionChip {
               glyph: "\uf08e"
               label: "Open"
+              keyboardSelected: root.keyboardIndex === 2
               onClicked: if (liveStore) liveStore.openVerse()
             }
           }
@@ -295,21 +344,24 @@ Panel {
                 ]
                 delegate: Rectangle {
                   required property var modelData
+                  required property int index
                   property bool selected: liveStore
                     ? liveStore.chipSelected(modelData.slug)
                     : false
+                  property bool keyboardSelected: root.keyboardIndex
+                    === root.actionCount + index
                   width: Math.max(Style.space(48), chipText.implicitWidth + Style.space(16))
                   height: Style.space(28)
                   radius: Style.space(8)
                   color: {
-                    if (chipMa.containsMouse && !selected)
+                    if ((chipMa.containsMouse || keyboardSelected) && !selected)
                       return Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.12)
                     if (selected)
                       return Qt.rgba(root.scripturalAccent.r, root.scripturalAccent.g, root.scripturalAccent.b, 0.28)
                     return Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.06)
                   }
-                  border.width: 1
-                  border.color: selected
+                  border.width: keyboardSelected ? 2 : 1
+                  border.color: selected || keyboardSelected
                     ? Qt.rgba(root.scripturalAccent.r, root.scripturalAccent.g, root.scripturalAccent.b, 0.55)
                     : Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.12)
 
@@ -336,6 +388,19 @@ Panel {
 
           }
 
+          // Contextual controls belong in the panel; Omarchy Learn lists
+          // global keybindings rather than keys handled by an open popup.
+          Text {
+            width: parent.width
+            text: "Arrows / HJKL move · Enter select\nC copy · Y ref · O open · R refresh · Esc close"
+            color: root.contentForeground
+            opacity: 0.42
+            font.family: root.contentFontFamily
+            font.pixelSize: Style.font.caption
+            wrapMode: Text.WordWrap
+            lineHeight: 1.35
+          }
+
           // Quiet footer
           Text {
             width: parent.width
@@ -357,9 +422,10 @@ Panel {
     property string glyph: ""
     property string label: ""
     property bool accent: false
+    property bool keyboardSelected: false
     signal clicked()
 
-    readonly property bool hovered: chipMa.containsMouse
+    readonly property bool hovered: chipMa.containsMouse || chip.keyboardSelected
 
     implicitWidth: chipRow.implicitWidth + Style.space(16)
     implicitHeight: Style.space(26)
@@ -373,8 +439,8 @@ Panel {
       : (chip.hovered
           ? Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.14)
           : Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.08))
-    border.width: 1
-    border.color: chip.accent
+    border.width: chip.keyboardSelected ? 2 : 1
+    border.color: chip.accent || chip.keyboardSelected
       ? Qt.rgba(root.scripturalAccent.r, root.scripturalAccent.g, root.scripturalAccent.b, 0.5)
       : Qt.rgba(root.contentForeground.r, root.contentForeground.g, root.contentForeground.b, 0.12)
 

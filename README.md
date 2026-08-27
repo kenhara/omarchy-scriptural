@@ -190,6 +190,10 @@ with a **cached** chip — never presented as a fresh network fetch.
 | Copy reference | Clipboard: reference only |
 | Open | Midvash verse URL (`https://midvash.com` / `www.midvash.com` only) |
 | Translation chips | Switch version + refetch / cache |
+| Arrow keys / `h` `j` `k` `l` | Move keyboard focus |
+| Enter / Space | Activate focused action or translation |
+| `c` / `y` / `o` / `r` | Copy verse / copy reference / open / refresh |
+| Escape | Close panel |
 
 ## Remove
 

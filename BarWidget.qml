@@ -87,12 +87,23 @@ BarWidget {
     })
   }
 
-  // Best-effort write-back so chip setVersion survives reload.
+  // Persist panel choices in this widget's inline shell.json entry.
   function mirrorVersion(slug) {
-    if (!root.settings) return
-    try {
-      root.settings.version = scripturalStore.normalizeVersion(slug)
-    } catch (e) {}
+    var entry = { id: root.moduleName }
+    for (var key in root.settings) {
+      if (key !== "id") entry[key] = root.settings[key]
+    }
+    entry.version = scripturalStore.normalizeVersion(slug)
+
+    // Apply locally first; the persisted shell.json update comes back through
+    // the host with the same value. Keeping both objects in step also prevents
+    // a later settings write from restoring a stale translation.
+    root.settings = entry
+    if (panelLoader.item && "settings" in panelLoader.item)
+      panelLoader.item.settings = entry
+    if (root.bar && root.bar.shell
+        && typeof root.bar.shell.updateEntryInline === "function")
+      root.bar.shell.updateEntryInline(root.moduleName, entry)
   }
 
   onBarChanged: injectPanel()
@@ -120,7 +131,6 @@ BarWidget {
     id: panelLoader
     active: true
     source: Qt.resolvedUrl("Panel.qml")
-    visible: false
     onLoaded: {
       root.panelLoadError = ""
       root.injectPanel()
